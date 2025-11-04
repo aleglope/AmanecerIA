@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Mood } from '../types';
+import { useTranslation } from '../context/LanguageContext';
 
 interface MoodSelectorProps {
   moodOptions: Mood[];
@@ -9,6 +10,7 @@ interface MoodSelectorProps {
 }
 
 export const MoodSelector: React.FC<MoodSelectorProps> = ({ moodOptions, selectedMood, onSelectMood }) => {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-wrap justify-center gap-2 md:gap-3">
       {moodOptions.map((mood) => (
@@ -21,7 +23,7 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ moodOptions, selecte
               : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'
           }`}
         >
-          {mood}
+          {t(`moods.${mood}`)}
         </button>
       ))}
     </div>

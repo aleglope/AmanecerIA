@@ -1,7 +1,9 @@
 
 import React from 'react';
+import { useTranslation } from '../context/LanguageContext';
 
 export const Problem: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <section id="problem" className="py-20 bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-6">
@@ -15,10 +17,10 @@ export const Problem: React.FC = () => {
           </div>
           <div className="text-center md:text-left">
             <h2 className="text-3xl font-bold text-gray-800 dark:text-night-text mb-4">
-              Las mañanas pueden ser difíciles.
+              {t('landing.problem.title')}
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto md:mx-0">
-              ¿Te despiertas con ansiedad, revisas el móvil y ya te sientes agotado? No estás solo. La primera hora del día define tu estado de ánimo.
+              {t('landing.problem.subtitle')}
             </p>
           </div>
         </div>

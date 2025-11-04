@@ -7,8 +7,10 @@ import { LoadingSpinner } from './LoadingSpinner';
 import { CrisisModal } from './CrisisModal';
 import { MessageDisplay } from './MessageDisplay';
 import { MoodSelector } from './MoodSelector';
+import { useTranslation } from '../context/LanguageContext';
 
 export const Solution = forwardRef<HTMLDivElement>((props, ref) => {
+  const { language, t } = useTranslation();
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [context, setContext] = useState('');
   const [message, setMessage] = useState('');
@@ -18,12 +20,12 @@ export const Solution = forwardRef<HTMLDivElement>((props, ref) => {
 
   const handleGetMessage = useCallback(async () => {
     if (!selectedMood) {
-      setError('Por favor, selecciona un estado de ánimo.');
+      setError(t('landing.solution.errorSelectMood'));
       return;
     }
 
     const lowerCaseContext = context.toLowerCase();
-    const crisisWordFound = CRISIS_KEYWORDS.some(word => lowerCaseContext.includes(word));
+    const crisisWordFound = CRISIS_KEYWORDS[language].some(word => lowerCaseContext.includes(word));
 
     if (crisisWordFound) {
       setShowCrisisModal(true);
@@ -35,15 +37,17 @@ export const Solution = forwardRef<HTMLDivElement>((props, ref) => {
     setMessage('');
 
     try {
-      const generatedMessage = await generateMorningMessage(selectedMood, context);
+      const translatedMood = t(`moods.${selectedMood}`);
+      const prompt = t('gemini.morningPrompt', { mood: translatedMood, context });
+      const generatedMessage = await generateMorningMessage(prompt, language);
       setMessage(generatedMessage);
     } catch (err) {
-      setError('Hubo un problema al generar tu mensaje. Inténtalo de nuevo.');
+      setError(t('landing.solution.errorGenerating'));
       console.error(err);
     } finally {
       setIsLoading(false);
     }
-  }, [selectedMood, context]);
+  }, [selectedMood, context, language, t]);
 
   return (
     <section id="solution" className="py-20 bg-white dark:bg-night-blue" ref={ref}>
@@ -51,10 +55,10 @@ export const Solution = forwardRef<HTMLDivElement>((props, ref) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-16">
             <div className="text-center md:text-left">
               <h2 className="text-3xl font-bold text-gray-800 dark:text-night-text mb-4">
-                Te presentamos "AmanecerIA"
+                {t('landing.solution.title')}
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto md:mx-0">
-                Una PWA ligera que te envía un mensaje positivo y accionable. No es una cita genérica; es un consejo práctico basado en TCC para ayudarte a reencuadrar tu día.
+                {t('landing.solution.subtitle')}
               </p>
             </div>
             <div className="flex justify-center">
@@ -65,8 +69,8 @@ export const Solution = forwardRef<HTMLDivElement>((props, ref) => {
                   <div className="h-[64px] w-[3px] bg-gray-800 dark:bg-gray-600 absolute -right-[17px] top-[142px] rounded-r-lg"></div>
                   <div className="rounded-[2rem] overflow-hidden w-full h-full bg-white dark:bg-gray-800">
                       <div className="p-4 bg-gray-50 dark:bg-gray-800 h-full flex flex-col justify-center">
-                        <div className="text-xs font-bold text-dawn-purple mb-2">Mensaje de IA</div>
-                        <p className="text-sm text-gray-700 dark:text-gray-300">"Buen día. Noto que ayer te sentiste 'abrumado'. Hoy, recuerda esto: no tienes que escalar toda la montaña, solo dar el siguiente paso. ¿Cuál es una pequeña cosa que sí puedes controlar en los próximos 10 minutos?"</p>
+                        <div className="text-xs font-bold text-dawn-purple mb-2">{t('landing.solution.phone.iaMessage')}</div>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">{t('landing.solution.phone.message')}</p>
                       </div>
                   </div>
               </div>
@@ -74,7 +78,7 @@ export const Solution = forwardRef<HTMLDivElement>((props, ref) => {
         </div>
         
         <div className="max-w-2xl mx-auto bg-gray-50 dark:bg-gray-800 p-6 md:p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
-            <h3 className="text-xl font-semibold text-gray-700 dark:text-night-text mb-2 text-center">Prueba la IA: ¿Cómo te sientes hoy?</h3>
+            <h3 className="text-xl font-semibold text-gray-700 dark:text-night-text mb-2 text-center">{t('landing.solution.tryit.title')}</h3>
             <MoodSelector
               moodOptions={MOOD_OPTIONS}
               selectedMood={selectedMood}
@@ -83,14 +87,14 @@ export const Solution = forwardRef<HTMLDivElement>((props, ref) => {
             
             <div className="mt-6">
               <label htmlFor="context" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
-                Añade un poco de contexto (opcional):
+                {t('landing.solution.tryit.contextLabel')}
               </label>
               <textarea
                 id="context"
                 rows={2}
                 value={context}
                 onChange={(e) => setContext(e.target.value)}
-                placeholder="Ej: Tengo una presentación importante..."
+                placeholder={t('landing.solution.tryit.contextPlaceholder')}
                 className="w-full px-3 py-2 text-gray-700 dark:text-night-text bg-white dark:bg-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-dawn-blue transition border-gray-300 dark:border-gray-600"
               ></textarea>
             </div>
@@ -101,7 +105,7 @@ export const Solution = forwardRef<HTMLDivElement>((props, ref) => {
                 disabled={isLoading || !selectedMood}
                 className="w-full md:w-auto bg-night-blue text-white dark:bg-gray-200 dark:text-night-blue font-bold py-3 px-10 rounded-full hover:bg-gray-700 dark:hover:bg-white disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-300 flex items-center justify-center mx-auto"
               >
-                {isLoading ? <LoadingSpinner /> : 'Generar mi mensaje'}
+                {isLoading ? <LoadingSpinner /> : t('landing.solution.tryit.button')}
               </button>
             </div>
 

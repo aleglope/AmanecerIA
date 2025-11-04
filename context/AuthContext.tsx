@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { User, Focus } from '../types';
 import { supabase } from '../supabaseClient';
@@ -131,7 +132,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const updateUserProfilePicture = async (photoUrl: string) => {
     if (!user) {
-      throw new Error("Usuario no autenticado.");
+      throw new Error("User not authenticated.");
     }
 
     const { data, error } = await supabase
@@ -142,11 +143,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     if (error) {
       console.error("Error updating profile picture URL:", error);
-      throw new Error("No se pudo actualizar la foto de perfil.");
+      throw new Error("Could not update profile picture.");
     }
 
     if (!data || data.length === 0) {
-      throw new Error("No se pudo confirmar la actualización de la foto de perfil.");
+      throw new Error("Could not confirm profile picture update.");
     }
 
     setUser(currentUser => currentUser ? { ...currentUser, photoURL: data[0].photo_url } : null);

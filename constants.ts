@@ -15,6 +15,13 @@ export const FOCUS_OPTIONS: Focus[] = [
   'Motivación',
 ];
 
-export const CRISIS_KEYWORDS: string[] = [
-  'suicidio', 'suicidarme', 'matarme', 'dañarme', 'autolesión', 'sin esperanza', 'no quiero vivir', 'acabar con todo'
-];
+export const CRISIS_KEYWORDS: { [key: string]: string[] } = {
+  es: [
+    'suicidio', 'suicidarme', 'matarme', 'dañarme', 'autolesión', 
+    'sin esperanza', 'no quiero vivir', 'acabar con todo'
+  ],
+  en: [
+    'suicide', 'kill myself', 'hurt myself', 'self-harm', 'no hope',
+    'don\'t want to live', 'end it all', 'ending my life'
+  ]
+};

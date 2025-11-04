@@ -7,9 +7,15 @@ import { PremiumPlaceholder } from '../components/dashboard/PremiumPlaceholder';
 import PremiumPlansPage from './PremiumPlansPage';
 import { ProfileHeader } from '../components/dashboard/ProfileHeader';
 import { NotificationBanner } from '../components/dashboard/NotificationBanner';
+import { MoodHistory } from '../components/dashboard/MoodHistory';
 
 export default function Dashboard() {
     const [view, setView] = useState<'dashboard' | 'premium'>('dashboard');
+    const [moodUpdateTrigger, setMoodUpdateTrigger] = useState(0);
+
+    const handleMoodSaved = () => {
+        setMoodUpdateTrigger(prev => prev + 1);
+    };
 
     if (view === 'premium') {
         return <PremiumPlansPage onBack={() => setView('dashboard')} />;
@@ -26,7 +32,8 @@ export default function Dashboard() {
                         <MessageCard />
                     </div>
                     <div className="lg:col-span-1 space-y-8">
-                        <MoodTracker />
+                        <MoodTracker onMoodSaved={handleMoodSaved} />
+                        <MoodHistory refreshTrigger={moodUpdateTrigger} />
                         <PremiumPlaceholder onClick={() => setView('premium')} />
                     </div>
                 </div>

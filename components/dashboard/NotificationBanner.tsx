@@ -1,8 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { subscribeUserToPush } from '../../utils/notificationUtils';
+import { useTranslation } from '../../context/LanguageContext';
 
 export const NotificationBanner: React.FC = () => {
+    const { t } = useTranslation();
     const [permissionStatus, setPermissionStatus] = useState<NotificationPermission>('default');
     const [isVisible, setIsVisible] = useState(false);
 
@@ -26,7 +28,6 @@ export const NotificationBanner: React.FC = () => {
 
         if (permission === 'granted') {
             await subscribeUserToPush();
-            // Hide the banner after a short delay
             setTimeout(() => setIsVisible(false), 3000);
         }
     };
@@ -39,27 +40,27 @@ export const NotificationBanner: React.FC = () => {
         switch (permissionStatus) {
             case 'granted':
                 return (
-                    <p className="font-semibold">¡Genial! Las notificaciones están activadas.</p>
+                    <p className="font-semibold">{t('dashboard.notificationBanner.granted')}</p>
                 );
             case 'denied':
                 return (
                     <div>
-                        <p className="font-semibold">Has bloqueado las notificaciones.</p>
-                        <p className="text-sm">Para recibirlas, debes activarlas en los ajustes de tu navegador.</p>
+                        <p className="font-semibold">{t('dashboard.notificationBanner.deniedTitle')}</p>
+                        <p className="text-sm">{t('dashboard.notificationBanner.deniedSubtitle')}</p>
                     </div>
                 );
             case 'default':
                 return (
                     <div className="flex flex-col sm:flex-row items-center justify-between w-full">
                         <div>
-                            <p className="font-semibold">Recibe tu mensaje cada mañana</p>
-                            <p className="text-sm">Activa las notificaciones para no perderte tu dosis diaria de positividad.</p>
+                            <p className="font-semibold">{t('dashboard.notificationBanner.title')}</p>
+                            <p className="text-sm">{t('dashboard.notificationBanner.subtitle')}</p>
                         </div>
                         <button 
                             onClick={requestNotificationPermission}
                             className="mt-2 sm:mt-0 sm:ml-4 bg-white text-night-blue font-bold py-2 px-5 rounded-full shadow-md hover:bg-gray-100 transition duration-300 shrink-0"
                         >
-                            Activar
+                            {t('dashboard.notificationBanner.button')}
                         </button>
                     </div>
                 );

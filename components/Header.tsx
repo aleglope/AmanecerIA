@@ -1,16 +1,37 @@
+
 import React, { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Avatar } from './Avatar';
+import { useTranslation } from '../context/LanguageContext';
 
 interface HeaderProps {
   onLoginClick?: () => void;
   onRegisterClick?: () => void;
 }
 
+const LanguageSwitcher: React.FC = () => {
+    const { language, setLanguage } = useTranslation();
+
+    const toggleLanguage = () => {
+        setLanguage(language === 'es' ? 'en' : 'es');
+    };
+
+    return (
+        <button
+            onClick={toggleLanguage}
+            className="p-2 w-10 h-10 flex items-center justify-center rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-300 font-semibold text-sm"
+        >
+            {language.toUpperCase()}
+        </button>
+    );
+};
+
+
 export const Header: React.FC<HeaderProps> = ({ onLoginClick, onRegisterClick }) => {
   const { user, logout } = useContext(AuthContext);
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <header className="bg-white/80 dark:bg-night-blue/80 backdrop-blur-md sticky top-0 z-50 shadow-sm dark:border-b dark:border-gray-700">
@@ -22,8 +43,9 @@ export const Header: React.FC<HeaderProps> = ({ onLoginClick, onRegisterClick })
             </svg>
             AmanecerIA
           </div>
-          <div className="flex items-center space-x-2 md:space-x-4">
-            <button onClick={toggleTheme} className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-300">
+          <div className="flex items-center space-x-1 md:space-x-2">
+            <LanguageSwitcher />
+            <button onClick={toggleTheme} className="p-2 w-10 h-10 flex items-center justify-center rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-300">
               {theme === 'light' ? (
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
               ) : (
@@ -40,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({ onLoginClick, onRegisterClick })
                   onClick={logout}
                   className="bg-dawn-pink/80 text-night-blue font-semibold py-2 px-4 rounded-full hover:bg-dawn-pink transition duration-300 text-sm"
                 >
-                  Salir
+                  {t('header.logout')}
                 </button>
               </div>
             ) : (
@@ -49,13 +71,13 @@ export const Header: React.FC<HeaderProps> = ({ onLoginClick, onRegisterClick })
                   onClick={onLoginClick}
                   className="font-semibold text-gray-600 dark:text-gray-300 hover:text-night-blue dark:hover:text-white transition duration-300"
                 >
-                  Iniciar Sesión
+                  {t('header.login')}
                 </button>
                 <button 
                   onClick={onRegisterClick}
                   className="bg-night-blue text-white font-bold py-2 px-4 rounded-full hover:bg-gray-700 dark:bg-gray-200 dark:text-night-blue dark:hover:bg-white transition duration-300"
                 >
-                  Registrarse
+                  {t('header.register')}
                 </button>
               </>
             )}

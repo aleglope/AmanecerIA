@@ -1,6 +1,8 @@
+
 import React, { useContext, useRef, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
+import { useTranslation } from '../context/LanguageContext';
 
 const MAX_FILE_SIZE_MB = 2;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -15,6 +17,7 @@ interface AvatarProps {
 
 export const Avatar: React.FC<AvatarProps> = ({ size = 'md', editable = false, onError, className }) => {
   const { user, updateUserProfilePicture } = useContext(AuthContext);
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -37,11 +40,11 @@ export const Avatar: React.FC<AvatarProps> = ({ size = 'md', editable = false, o
 
     // Validation
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-      onError?.(`Formato no válido. Sube un archivo JPG o PNG.`);
+      onError?.(t('avatar.errorFormat'));
       return;
     }
     if (file.size > MAX_FILE_SIZE_BYTES) {
-      onError?.(`El archivo es muy grande. El tamaño máximo es de ${MAX_FILE_SIZE_MB}MB.`);
+      onError?.(t('avatar.errorSize', { size: MAX_FILE_SIZE_MB }));
       return;
     }
     
@@ -62,17 +65,15 @@ export const Avatar: React.FC<AvatarProps> = ({ size = 'md', editable = false, o
         .from('avatars')
         .getPublicUrl(filePath);
       
-      // Add a timestamp to bypass browser cache
       const photoUrlWithCacheBuster = `${data.publicUrl}?t=${new Date().getTime()}`;
 
       await updateUserProfilePicture(photoUrlWithCacheBuster);
 
     } catch (error: any) {
-      onError?.(error.message || 'Hubo un error al subir la imagen.');
+      onError?.(error.message || t('avatar.errorUpload'));
       console.error(error);
     } finally {
       setIsUploading(false);
-      // Reset file input value to allow re-uploading the same file
       if(fileInputRef.current) {
         fileInputRef.current.value = '';
       }

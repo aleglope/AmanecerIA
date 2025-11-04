@@ -1,18 +1,25 @@
+
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { supabase } from '../../supabaseClient';
+import { useTranslation } from '../../context/LanguageContext';
 
-type EmojiMood = { emoji: string; label: string; };
+type EmojiMood = { emoji: string; labelKey: string; };
 
 const EMOJI_MOODS: EmojiMood[] = [
-    { emoji: '😞', label: 'Muy mal' },
-    { emoji: '😐', label: 'Neutral' },
-    { emoji: '🙂', label: 'Bien' },
-    { emoji: '😄', label: 'Genial' },
-    { emoji: '🤩', label: 'Increíble' },
+    { emoji: '😞', labelKey: 'very_bad' },
+    { emoji: '😐', labelKey: 'neutral' },
+    { emoji: '🙂', labelKey: 'good' },
+    { emoji: '😄', labelKey: 'great' },
+    { emoji: '🤩', labelKey: 'awesome' },
 ];
 
-export const MoodTracker: React.FC = () => {
+interface MoodTrackerProps {
+    onMoodSaved: () => void;
+}
+
+export const MoodTracker: React.FC<MoodTrackerProps> = ({ onMoodSaved }) => {
+    const { t } = useTranslation();
     const [selectedMood, setSelectedMood] = useState<EmojiMood | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState('');
@@ -32,7 +39,7 @@ export const MoodTracker: React.FC = () => {
                 .from('mood_history')
                 .insert({
                     user_id: user.id,
-                    mood_label: mood.label,
+                    mood_label: mood.labelKey, // Save the key, not the translated label
                     mood_emoji: mood.emoji,
                 });
 
@@ -40,11 +47,13 @@ export const MoodTracker: React.FC = () => {
                 throw insertError;
             }
 
-            setSuccessMessage(`Has registrado: ${mood.label}`);
+            const translatedLabel = t(`moodLabels.${mood.labelKey}`);
+            setSuccessMessage(t('dashboard.moodTracker.success', { mood: translatedLabel }));
+            onMoodSaved();
 
         } catch (err: any) {
             console.error('Error saving mood:', err);
-            setError('No se pudo guardar tu ánimo. Inténtalo de nuevo.');
+            setError(t('dashboard.moodTracker.error'));
             setSelectedMood(null); // Revert selection on error
         } finally {
             setIsSaving(false);
@@ -53,16 +62,16 @@ export const MoodTracker: React.FC = () => {
 
     return (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700">
-            <h2 className="text-xl font-bold text-gray-800 dark:text-night-text mb-1">¿Cómo te sientes ahora?</h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-4 text-sm">Registra tu estado de ánimo.</p>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-night-text mb-1">{t('dashboard.moodTracker.title')}</h2>
+            <p className="text-gray-500 dark:text-gray-400 mb-4 text-sm">{t('dashboard.moodTracker.subtitle')}</p>
             <div className="flex justify-around items-center">
                 {EMOJI_MOODS.map(mood => (
                     <button 
-                        key={mood.label}
+                        key={mood.labelKey}
                         onClick={() => handleMoodSelect(mood)}
                         disabled={isSaving}
-                        className={`p-2 rounded-full transition-all duration-200 transform hover:scale-125 disabled:opacity-50 disabled:cursor-wait ${selectedMood?.emoji === mood.emoji ? 'bg-dawn-blue/50' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-                        aria-label={mood.label}
+                        className={`p-2 rounded-full transition-all duration-200 transform hover:scale-125 disabled:opacity-50 disabled:cursor-wait ${selectedMood?.labelKey === mood.labelKey ? 'bg-dawn-blue/50' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                        aria-label={t(`moodLabels.${mood.labelKey}`)}
                     >
                         <span className="text-3xl md:text-4xl">{mood.emoji}</span>
                     </button>

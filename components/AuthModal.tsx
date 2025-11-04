@@ -1,6 +1,8 @@
+
 import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { LoadingSpinner } from './LoadingSpinner';
+import { useTranslation } from '../context/LanguageContext';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -9,6 +11,7 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultView = 'register' }) => {
+  const { t } = useTranslation();
   const [view, setView] = useState(defaultView);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -66,7 +69,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultVi
         setError('');
         setNeedsConfirmation(false);
     } catch (err: any) {
-        setError('Error al reenviar el correo. Inténtalo de nuevo.');
+        setError(t('auth.errors.resendFailed'));
         console.error(err);
     } finally {
         setIsLoading(false);
@@ -82,7 +85,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultVi
     try {
       if (view === 'login') {
         if (!email || !password) {
-            setError('Por favor, introduce tu email y contraseña.');
+            setError(t('auth.errors.missingFields'));
             setIsLoading(false);
             return;
         }
@@ -90,7 +93,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultVi
         onClose();
       } else {
         if (!name || !email || !password) {
-            setError('Por favor, completa todos los campos.');
+            setError(t('auth.errors.missingFieldsAll'));
             setIsLoading(false);
             return;
         }
@@ -98,19 +101,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultVi
         setShowConfirmationMessage(true);
       }
     } catch (err: any) {
-      // Safely convert the error message to a lowercase string to make detection robust.
       const message = String(err?.message || '').toLowerCase();
-
-      // Check for the "email not confirmed" case first.
+      
       if (message.includes('email not confirmed')) {
         setNeedsConfirmation(true);
-        // Crucially, ensure no other error message is displayed.
         setError(''); 
       } else if (message.includes('invalid login credentials')) {
-        setError('El correo electrónico o la contraseña son incorrectos. Por favor, inténtalo de nuevo.');
-        setNeedsConfirmation(false); // Ensure the confirmation banner is hidden.
+        setError(t('auth.errors.invalidCredentials'));
+        setNeedsConfirmation(false);
       } else {
-        setError('Ha ocurrido un error. Revisa tus datos o inténtalo más tarde.');
+        setError(t('auth.errors.generic'));
         setNeedsConfirmation(false);
       }
       console.error(err);
@@ -140,47 +140,47 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultVi
         
         {showConfirmationMessage ? (
           <div>
-              <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-night-text mb-2">¡Casi listo!</h2>
+              <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-night-text mb-2">{t('auth.confirmation.title')}</h2>
               <p className="text-center text-gray-500 dark:text-gray-400 mb-6">
-                  Te hemos enviado un correo a <strong>{email}</strong>. Por favor, haz clic en el enlace de confirmación para activar tu cuenta.
+                  {t('auth.confirmation.message', { email: email })}
               </p>
               <button onClick={onClose} className="w-full bg-night-blue hover:bg-gray-700 dark:bg-gray-200 dark:hover:bg-white dark:text-night-blue text-white font-bold py-2.5 px-4 rounded-lg focus:outline-none focus:shadow-outline transition-colors duration-300">
-                  Entendido
+                  {t('auth.confirmation.button')}
               </button>
           </div>
         ) : (
           <>
             <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-night-text mb-2">
-              {view === 'login' ? 'Bienvenido/a' : 'Respira. Estamos aquí.'}
+              {view === 'login' ? t('auth.login.title') : t('auth.register.title')}
             </h2>
             <p className="text-center text-gray-500 dark:text-gray-400 mb-6">
-              {view === 'login' ? 'Inicia sesión para continuar.' : 'Crea tu cuenta para empezar.'}
+              {view === 'login' ? t('auth.login.subtitle') : t('auth.register.subtitle')}
             </p>
             
             <button className="w-full bg-white hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-night-text font-semibold py-2.5 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm transition-colors duration-300 flex items-center justify-center mb-4">
                 <img src="https://www.google.com/favicon.ico" alt="Google icon" className="h-5 w-5 mr-3"/>
-                Continuar con Google
+                {t('auth.continueWithGoogle')}
             </button>
 
             <div className="my-4 flex items-center">
                 <hr className="w-full border-t border-gray-200 dark:border-gray-600" />
-                <span className="px-2 text-gray-400 text-xs">O</span>
+                <span className="px-2 text-gray-400 text-xs">{t('auth.orSeparator')}</span>
                 <hr className="w-full border-t border-gray-200 dark:border-gray-600" />
             </div>
 
             <form onSubmit={handleSubmit}>
               {view === 'register' && (
                 <div className="mb-4">
-                  <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="name">Nombre</label>
+                  <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="name">{t('auth.nameLabel')}</label>
                   <input id="name" type="text" value={name} onChange={e => setName(e.target.value)} className="shadow-sm appearance-none border dark:border-gray-600 rounded-lg w-full py-2 px-3 text-gray-700 dark:text-night-text bg-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-dawn-blue" />
                 </div>
               )}
               <div className="mb-4">
-                <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="email">Email</label>
+                <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="email">{t('auth.emailLabel')}</label>
                 <input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} className="shadow-sm appearance-none border dark:border-gray-600 rounded-lg w-full py-2 px-3 text-gray-700 dark:text-night-text bg-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-dawn-blue" />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="password">Contraseña</label>
+                <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="password">{t('auth.passwordLabel')}</label>
                 <input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} className="shadow-sm appearance-none border dark:border-gray-600 rounded-lg w-full py-2 px-3 text-gray-700 dark:text-night-text bg-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-dawn-blue" />
               </div>
 
@@ -192,32 +192,34 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultVi
               
               {view === 'login' && needsConfirmation && (
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 p-4 rounded-r-lg mb-4 text-sm">
-                    <h4 className="font-bold text-yellow-800 dark:text-yellow-200">Confirma tu correo electrónico</h4>
+                    <h4 className="font-bold text-yellow-800 dark:text-yellow-200">{t('auth.needsConfirmation.title')}</h4>
                     <p className="text-yellow-700 dark:text-yellow-300 mt-1">
-                        Revisa tu bandeja de entrada y haz clic en el enlace de activación.
+                        {t('auth.needsConfirmation.message')}
                     </p>
                     <button type="button" onClick={handleResendEmail} disabled={isLoading} className="font-semibold text-yellow-800 dark:text-yellow-200 hover:underline mt-2 disabled:opacity-50">
-                        {isLoading ? 'Enviando...' : 'Reenviar correo'}
+                        {isLoading ? t('auth.needsConfirmation.resending') : t('auth.needsConfirmation.resendButton')}
                     </button>
                 </div>
               )}
               
-              {resentEmail && <p className="text-green-600 text-xs text-center mb-4">¡Correo de confirmación reenviado con éxito a <strong>{email}</strong>!</p>}
+              {resentEmail && <p className="text-green-600 text-xs text-center mb-4">{t('auth.resentSuccess', { email: email })}</p>}
 
               <div className="mt-6">
                 <button type="submit" disabled={isLoading} className="w-full bg-night-blue hover:bg-gray-700 dark:bg-gray-200 dark:hover:bg-white dark:text-night-blue text-white font-bold py-2.5 px-4 rounded-lg focus:outline-none focus:shadow-outline transition-colors duration-300 flex items-center justify-center disabled:bg-gray-400">
-                  {isLoading ? <LoadingSpinner /> : (view === 'login' ? 'Iniciar Sesión' : 'Registrarse con Email')}
+                  {isLoading ? <LoadingSpinner /> : (view === 'login' ? t('auth.login.button') : t('auth.register.button'))}
                 </button>
               </div>
             </form>
 
             <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
-              {view === 'login' ? '¿No tienes una cuenta?' : '¿Ya tienes una cuenta?'}
+              {view === 'login' ? t('auth.noAccount') : t('auth.hasAccount')}
               <button onClick={() => setView(view === 'login' ? 'register' : 'login')} className="font-semibold text-dawn-purple hover:underline ml-1">
-                {view === 'login' ? 'Regístrate' : 'Inicia sesión'}
+                {view === 'login' ? t('auth.register.link') : t('auth.login.link')}
               </button>
             </p>
-            <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">Al continuar, aceptas nuestros <a href="#" className="underline">Términos</a> y <a href="#" className="underline">Política de Privacidad</a>.</p>
+            <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
+                {t('auth.legal.prefix')} <a href="#" className="underline">{t('auth.legal.terms')}</a> {t('auth.legal.and')} <a href="#" className="underline">{t('auth.legal.privacy')}</a>.
+            </p>
           </>
         )}
       </div>

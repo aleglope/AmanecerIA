@@ -1,18 +1,19 @@
 
 import React from 'react';
+import { useTranslation } from '../../context/LanguageContext';
 
 interface PricingCardProps {
     title: string;
     price: string;
     period: string;
     description: string;
-
     badge?: string;
     isRecommended?: boolean;
     onSelect: () => void;
 }
 
 export const PricingCard: React.FC<PricingCardProps> = ({ title, price, period, description, badge, isRecommended = false, onSelect }) => {
+    const { t } = useTranslation();
     return (
         <div className={`w-full p-8 rounded-2xl border transition-all duration-300 ${isRecommended ? 'bg-night-blue text-white border-night-blue dark:bg-dawn-purple dark:border-dawn-purple dark:text-night-blue shadow-2xl' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'}`}>
             {badge && (
@@ -30,7 +31,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({ title, price, period, 
                 onClick={onSelect}
                 className={`w-full mt-8 py-3 px-6 rounded-lg font-bold transition-colors duration-300 ${isRecommended ? 'bg-white text-night-blue hover:bg-gray-200' : 'bg-night-blue text-white dark:bg-gray-200 dark:text-night-blue hover:bg-gray-700 dark:hover:bg-white'}`}
             >
-                Empezar prueba de 7 días
+                {t('premiumPage.pricing.button')}
             </button>
         </div>
     );

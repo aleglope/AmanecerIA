@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from '../context/LanguageContext';
 
 interface MessageDisplayProps {
   isLoading: boolean;
@@ -28,6 +29,7 @@ const TypingEffect: React.FC<{ text: string }> = ({ text }) => {
 };
 
 export const MessageDisplay: React.FC<MessageDisplayProps> = ({ isLoading, message }) => {
+  const { t } = useTranslation();
   if (isLoading) {
     return (
         <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg min-h-[100px] flex items-center justify-center">
@@ -43,8 +45,8 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({ isLoading, messa
   if (!message) {
      return (
         <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg min-h-[100px] flex flex-col items-center justify-center text-center">
-            <p className="text-gray-500 dark:text-gray-400 font-semibold">Tu mensaje aparecerá aquí</p>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">"No tienes que escalar toda la montaña, solo dar el siguiente paso."</p>
+            <p className="text-gray-500 dark:text-gray-400 font-semibold">{t('messageDisplay.placeholder.title')}</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">{t('messageDisplay.placeholder.quote')}</p>
         </div>
     );
   }
