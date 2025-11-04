@@ -13,6 +13,7 @@ interface AuthContextType {
   updateUserFocus: (focus: Focus) => Promise<void>;
   updateUserProfilePicture: (photoUrl: string) => Promise<void>;
   resendConfirmationEmail: (email: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -24,6 +25,7 @@ export const AuthContext = createContext<AuthContextType>({
   updateUserFocus: async () => {},
   updateUserProfilePicture: async () => {},
   resendConfirmationEmail: async () => {},
+  loginWithGoogle: async () => {},
 });
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -88,6 +90,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
     setLoading(false);
     if (error) throw error;
+  };
+
+  const loginWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+    });
+    if (error) {
+        console.error('Error logging in with Google:', error);
+        throw error;
+    }
   };
 
   const register = async (name: string, email: string, pass: string) => {
@@ -170,6 +182,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     updateUserFocus,
     updateUserProfilePicture,
     resendConfirmationEmail,
+    loginWithGoogle,
   };
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
