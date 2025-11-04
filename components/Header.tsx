@@ -1,4 +1,3 @@
-
 import React, { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -35,13 +34,10 @@ export const Header: React.FC<HeaderProps> = ({ onLoginClick, onRegisterClick })
 
   return (
     <header className="bg-white/80 dark:bg-night-blue/80 backdrop-blur-md sticky top-0 z-50 shadow-sm dark:border-b dark:border-gray-700">
-      <div className="container mx-auto px-6 py-4">
+      <div className="container mx-auto px-6 py-3">
         <div className="flex items-center justify-between">
-          <div className="text-2xl font-bold text-gray-800 dark:text-night-text flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mr-2 text-dawn-orange" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1.343l3.93 3.93a1 1 0 01-1.414 1.414L10 6.414l-3.515 3.515a1 1 0 01-1.414-1.414L9 4.343V3a1 1 0 011-1zM4.03 8.014L5.445 9.43a1 1 0 11-1.414 1.414l-1.415-1.414a1 1 0 011.414-1.414zM16.383 9.844a1 1 0 010 1.414l-1.414 1.414a1 1 0 01-1.414-1.414l1.414-1.414a1 1 0 011.414 0zM10 18a1 1 0 01-1-1v-1.343l-3.93-3.93a1 1 0 111.414-1.414L10 13.586l3.515-3.515a1 1 0 111.414 1.414L11 15.657V17a1 1 0 01-1 1z" clipRule="evenodd" />
-            </svg>
-            AmanecerIA
+          <div className="flex-shrink-0">
+             <img className="h-12" src="/assets/AmanecerIA-Logo.png" alt="AmanecerIA Logo" />
           </div>
           <div className="flex items-center space-x-1 md:space-x-2">
             <LanguageSwitcher />
