@@ -4,22 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { FOCUS_OPTIONS } from '../constants';
 import { Focus } from '../types';
 import { useTranslation } from '../context/LanguageContext';
-
-const FocusCard: React.FC<{ titleKey: Focus; selected: boolean; onClick: () => void }> = ({ titleKey, selected, onClick }) => {
-    const { t } = useTranslation();
-    return (
-        <button 
-            onClick={onClick}
-            className={`w-full text-left p-6 border-2 rounded-lg transition-all duration-200 ${
-                selected 
-                ? 'border-dawn-purple bg-dawn-purple/10 shadow-lg' 
-                : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500'
-            }`}
-        >
-            <h3 className="text-xl font-bold text-gray-800 dark:text-night-text">{t(`focuses.${titleKey}`)}</h3>
-        </button>
-    )
-};
+import { FocusCard } from '../components/FocusCard';
 
 
 export default function Onboarding() {
@@ -49,6 +34,7 @@ export default function Onboarding() {
                         titleKey={focus}
                         selected={selectedFocus === focus}
                         onClick={() => setSelectedFocus(focus)}
+                        size="lg"
                     />
                 ))}
             </div>

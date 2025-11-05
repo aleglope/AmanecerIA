@@ -1,10 +1,9 @@
-
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { supabase } from '../../supabaseClient';
 import { useTranslation } from '../../context/LanguageContext';
 import { EmojiMood } from '../../types';
-import { DASHBOARD_MOODS } from '../../constants';
+import { DASHBOARD_MOODS, MOOD_MAP } from '../../constants';
 
 interface MoodTrackerProps {
     onMoodSaved: () => void;
@@ -27,13 +26,16 @@ export const MoodTracker: React.FC<MoodTrackerProps> = ({ onMoodSaved }) => {
         setSelectedMood(mood);
 
         try {
+            // Convert the language-agnostic key (e.g., 'great') to the Spanish value the DB ENUM expects (e.g., 'Genial')
+            const dbLabel = MOOD_MAP[mood.labelKey];
+
             const { error: insertError } = await supabase
                 .from('mood_history')
-                .insert({
+                .insert([{
                     user_id: user.id,
-                    mood_label: mood.labelKey, // Save the key, not the translated label
+                    mood_label: dbLabel,
                     mood_emoji: mood.emoji,
-                });
+                }]);
 
             if (insertError) {
                 throw insertError;

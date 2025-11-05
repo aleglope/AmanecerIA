@@ -1,16 +1,15 @@
-
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { supabase } from '../../supabaseClient';
 import { useTranslation } from '../../context/LanguageContext';
 import { DashboardMoodLabel } from '../../types';
-import { DASHBOARD_MOODS } from '../../constants';
+import { DASHBOARD_MOODS, REVERSE_MOOD_MAP } from '../../constants';
 
 interface MoodEntry {
   id: string;
   created_at: string;
   mood_emoji: string;
-  mood_label: DashboardMoodLabel | string; // Handle both keys and old translated values
+  mood_label: string; // The DB stores the Spanish value, so this is a string
 }
 
 interface MoodHistoryProps {
@@ -26,11 +25,22 @@ const MoodHistoryItem: React.FC<{ entry: MoodEntry }> = ({ entry }) => {
         day: 'numeric',
     });
 
-    // Check if the stored label is one of the keys.
-    // If it is, translate it. Otherwise, display it as is (for backward compatibility).
-    const displayLabel = moodLabelKeys.includes(entry.mood_label as DashboardMoodLabel)
-        ? t(`moodLabels.${entry.mood_label}`)
-        : entry.mood_label;
+    // Convert the stored Spanish value (e.g., 'Genial') back to a language-agnostic key (e.g., 'great').
+    const moodKey = REVERSE_MOOD_MAP[entry.mood_label];
+    
+    let displayLabel = '';
+
+    if (moodKey) {
+        // If we found a key, translate it using the user's current language. This is the ideal path.
+        displayLabel = t(`moodLabels.${moodKey}`);
+    } else if (moodLabelKeys.includes(entry.mood_label as DashboardMoodLabel)) {
+        // Fallback for old data that might have been incorrectly stored as a key.
+        displayLabel = t(`moodLabels.${entry.mood_label}`);
+    } else {
+        // Final fallback: display the raw data if it's neither a known Spanish value nor a key.
+        displayLabel = entry.mood_label;
+    }
+
 
     return (
         <li className="flex items-center justify-between py-3">

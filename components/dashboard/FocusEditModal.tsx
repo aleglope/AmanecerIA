@@ -4,27 +4,12 @@ import { useTranslation } from '../../context/LanguageContext';
 import { Focus } from '../../types';
 import { FOCUS_OPTIONS } from '../../constants';
 import { LoadingSpinner } from '../LoadingSpinner';
+import { FocusCard } from '../FocusCard';
 
 interface FocusEditModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-const FocusCard: React.FC<{ titleKey: Focus; selected: boolean; onClick: () => void }> = ({ titleKey, selected, onClick }) => {
-    const { t } = useTranslation();
-    return (
-        <button 
-            onClick={onClick}
-            className={`w-full text-left p-4 border-2 rounded-lg transition-all duration-200 ${
-                selected 
-                ? 'border-dawn-purple bg-dawn-purple/10 shadow-md' 
-                : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500'
-            }`}
-        >
-            <h3 className="text-lg font-bold text-gray-800 dark:text-night-text">{t(`focuses.${titleKey}`)}</h3>
-        </button>
-    )
-};
 
 export const FocusEditModal: React.FC<FocusEditModalProps> = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
