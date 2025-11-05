@@ -3,17 +3,21 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { supabase } from '../../supabaseClient';
 import { useTranslation } from '../../context/LanguageContext';
+import { DashboardMoodLabel } from '../../types';
+import { DASHBOARD_MOODS } from '../../constants';
 
 interface MoodEntry {
   id: string;
   created_at: string;
   mood_emoji: string;
-  mood_label: string; // This now holds the labelKey, e.g., 'very_bad'
+  mood_label: DashboardMoodLabel | string; // Handle both keys and old translated values
 }
 
 interface MoodHistoryProps {
     refreshTrigger: number;
 }
+
+const moodLabelKeys = DASHBOARD_MOODS.map(m => m.labelKey);
 
 const MoodHistoryItem: React.FC<{ entry: MoodEntry }> = ({ entry }) => {
     const { t, language } = useTranslation();
@@ -22,11 +26,17 @@ const MoodHistoryItem: React.FC<{ entry: MoodEntry }> = ({ entry }) => {
         day: 'numeric',
     });
 
+    // Check if the stored label is one of the keys.
+    // If it is, translate it. Otherwise, display it as is (for backward compatibility).
+    const displayLabel = moodLabelKeys.includes(entry.mood_label as DashboardMoodLabel)
+        ? t(`moodLabels.${entry.mood_label}`)
+        : entry.mood_label;
+
     return (
         <li className="flex items-center justify-between py-3">
             <div className="flex items-center space-x-3">
                 <span className="text-2xl">{entry.mood_emoji}</span>
-                <span className="font-semibold text-gray-700 dark:text-gray-300">{t(`moodLabels.${entry.mood_label}`)}</span>
+                <span className="font-semibold text-gray-700 dark:text-gray-300">{displayLabel}</span>
             </div>
             <span className="text-sm text-gray-500 dark:text-gray-400">{formattedDate}</span>
         </li>

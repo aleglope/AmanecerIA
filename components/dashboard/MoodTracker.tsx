@@ -3,16 +3,8 @@ import React, { useState, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { supabase } from '../../supabaseClient';
 import { useTranslation } from '../../context/LanguageContext';
-
-type EmojiMood = { emoji: string; labelKey: string; };
-
-const EMOJI_MOODS: EmojiMood[] = [
-    { emoji: '😞', labelKey: 'very_bad' },
-    { emoji: '😐', labelKey: 'neutral' },
-    { emoji: '🙂', labelKey: 'good' },
-    { emoji: '😄', labelKey: 'great' },
-    { emoji: '🤩', labelKey: 'awesome' },
-];
+import { EmojiMood } from '../../types';
+import { DASHBOARD_MOODS } from '../../constants';
 
 interface MoodTrackerProps {
     onMoodSaved: () => void;
@@ -65,7 +57,7 @@ export const MoodTracker: React.FC<MoodTrackerProps> = ({ onMoodSaved }) => {
             <h2 className="text-xl font-bold text-gray-800 dark:text-night-text mb-1">{t('dashboard.moodTracker.title')}</h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4 text-sm">{t('dashboard.moodTracker.subtitle')}</p>
             <div className="flex justify-around items-center">
-                {EMOJI_MOODS.map(mood => (
+                {DASHBOARD_MOODS.map(mood => (
                     <button 
                         key={mood.labelKey}
                         onClick={() => handleMoodSelect(mood)}

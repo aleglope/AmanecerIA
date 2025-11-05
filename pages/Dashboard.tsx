@@ -1,16 +1,19 @@
-
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Header } from '../components/Header';
 import { MessageCard } from '../components/dashboard/MessageCard';
 import { MoodTracker } from '../components/dashboard/MoodTracker';
 import { PremiumPlaceholder } from '../components/dashboard/PremiumPlaceholder';
 import PremiumPlansPage from './PremiumPlansPage';
+import ChatPage from './ChatPage';
 import { ProfileHeader } from '../components/dashboard/ProfileHeader';
 import { NotificationBanner } from '../components/dashboard/NotificationBanner';
 import { MoodHistory } from '../components/dashboard/MoodHistory';
+import { AuthContext } from '../context/AuthContext';
+import { ChatCTA } from '../components/dashboard/ChatCTA';
 
 export default function Dashboard() {
-    const [view, setView] = useState<'dashboard' | 'premium'>('dashboard');
+    const { user } = useContext(AuthContext);
+    const [view, setView] = useState<'dashboard' | 'premium' | 'chat'>('dashboard');
     const [moodUpdateTrigger, setMoodUpdateTrigger] = useState(0);
 
     const handleMoodSaved = () => {
@@ -19,6 +22,10 @@ export default function Dashboard() {
 
     if (view === 'premium') {
         return <PremiumPlansPage onBack={() => setView('dashboard')} />;
+    }
+
+    if (view === 'chat') {
+        return <ChatPage onBack={() => setView('dashboard')} />;
     }
 
     return (
@@ -34,7 +41,11 @@ export default function Dashboard() {
                     <div className="lg:col-span-1 space-y-8">
                         <MoodTracker onMoodSaved={handleMoodSaved} />
                         <MoodHistory refreshTrigger={moodUpdateTrigger} />
-                        <PremiumPlaceholder onClick={() => setView('premium')} />
+                        {user?.is_premium ? (
+                            <ChatCTA onClick={() => setView('chat')} />
+                        ) : (
+                            <PremiumPlaceholder onClick={() => setView('premium')} />
+                        )}
                     </div>
                 </div>
             </main>

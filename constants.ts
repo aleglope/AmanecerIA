@@ -1,5 +1,5 @@
 
-import { Mood, Focus } from './types';
+import { Mood, Focus, EmojiMood } from './types';
 
 export const MOOD_OPTIONS: Mood[] = [
   'Ansiedad',
@@ -13,6 +13,14 @@ export const FOCUS_OPTIONS: Focus[] = [
   'Autoestima',
   'Ansiedad',
   'Motivación',
+];
+
+export const DASHBOARD_MOODS: EmojiMood[] = [
+    { emoji: '😞', labelKey: 'very_bad' },
+    { emoji: '😐', labelKey: 'neutral' },
+    { emoji: '🙂', labelKey: 'ok' },
+    { emoji: '😄', labelKey: 'great' },
+    { emoji: '🤩', labelKey: 'very_good' },
 ];
 
 export const CRISIS_KEYWORDS: { [key: string]: string[] } = {

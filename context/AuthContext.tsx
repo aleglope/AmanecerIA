@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { User, Focus } from '../types';
 import { supabase } from '../supabaseClient';
@@ -12,8 +11,10 @@ interface AuthContextType {
   register: (name: string, email: string, pass: string) => Promise<any>;
   updateUserFocus: (focus: Focus) => Promise<void>;
   updateUserProfilePicture: (photoUrl: string) => Promise<void>;
+  updateUserName: (name: string) => Promise<void>;
   resendConfirmationEmail: (email: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
+  updateUserToPremium: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -24,8 +25,10 @@ export const AuthContext = createContext<AuthContextType>({
   register: async () => {},
   updateUserFocus: async () => {},
   updateUserProfilePicture: async () => {},
+  updateUserName: async () => {},
   resendConfirmationEmail: async () => {},
   loginWithGoogle: async () => {},
+  updateUserToPremium: async () => {},
 });
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -38,7 +41,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (session) {
         const { data: profile, error } = await supabase
           .from('profiles')
-          .select('name, focus, photo_url')
+          .select('name, focus, photo_url, is_premium')
           .eq('id', session.user.id)
           .single();
 
@@ -60,6 +63,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               name: newProfile.name,
               focus: undefined,
               photoURL: undefined,
+              is_premium: false,
             });
           }
         } else if (error) {
@@ -72,6 +76,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             name: profile?.name,
             focus: profile?.focus as Focus,
             photoURL: profile?.photo_url,
+            is_premium: profile?.is_premium,
           });
         }
       } else {
@@ -165,6 +170,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(currentUser => currentUser ? { ...currentUser, photoURL: data[0].photo_url } : null);
   };
 
+  const updateUserName = async (name: string) => {
+    if (user) {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ name: name, updated_at: new Date() })
+        .eq('id', user.id);
+      
+      if (error) {
+        console.error("Error updating name:", error);
+        throw error;
+      } else {
+        setUser({ ...user, name });
+      }
+    }
+  };
+  
+  const updateUserToPremium = async () => {
+    if (user) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ is_premium: true, updated_at: new Date() })
+        .eq('id', user.id)
+        .select('is_premium');
+      
+      if (error) {
+        console.error("Error updating to premium:", error);
+        throw error;
+      }
+
+      setUser(currentUser => currentUser ? { ...currentUser, is_premium: data?.[0].is_premium } : null);
+    }
+  };
+
   const resendConfirmationEmail = async (email: string) => {
     const { error } = await supabase.auth.resend({
         type: 'signup',
@@ -181,8 +219,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     register,
     updateUserFocus,
     updateUserProfilePicture,
+    updateUserName,
     resendConfirmationEmail,
     loginWithGoogle,
+    updateUserToPremium,
   };
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;

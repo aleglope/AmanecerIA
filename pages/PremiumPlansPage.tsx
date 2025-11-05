@@ -1,10 +1,11 @@
-
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { FeatureListItem } from '../components/premium/FeatureListItem';
 import { PricingCard } from '../components/premium/PricingCard';
 import { useTranslation } from '../context/LanguageContext';
+import { AuthContext } from '../context/AuthContext';
+
 
 interface PremiumPlansPageProps {
     onBack: () => void;
@@ -12,6 +13,24 @@ interface PremiumPlansPageProps {
 
 const PremiumPlansPage: React.FC<PremiumPlansPageProps> = ({ onBack }) => {
     const { t } = useTranslation();
+    const { updateUserToPremium } = useContext(AuthContext);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleSelectPlan = async () => {
+        setIsUpdating(true);
+        setError('');
+        try {
+            await updateUserToPremium();
+            onBack();
+        } catch (err) {
+            setError(t('premiumPage.updateError'));
+            console.error(err);
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-night-blue">
             <Header />
@@ -59,7 +78,8 @@ const PremiumPlansPage: React.FC<PremiumPlansPageProps> = ({ onBack }) => {
                         price="4.99€"
                         period={t('premiumPage.pricing.monthly.period')}
                         description={t('premiumPage.pricing.monthly.description')}
-                        onSelect={() => alert('Start monthly trial (simulated)')}
+                        onSelect={handleSelectPlan}
+                        isLoading={isUpdating}
                     />
                     <PricingCard 
                         title={t('premiumPage.pricing.yearly.title')}
@@ -68,9 +88,12 @@ const PremiumPlansPage: React.FC<PremiumPlansPageProps> = ({ onBack }) => {
                         description={t('premiumPage.pricing.yearly.description')}
                         badge={t('premiumPage.pricing.yearly.badge')}
                         isRecommended={true}
-                        onSelect={() => alert('Start yearly trial (simulated)')}
+                        onSelect={handleSelectPlan}
+                        isLoading={isUpdating}
                     />
                 </div>
+
+                {error && <p className="text-center text-red-500 mt-8">{error}</p>}
 
                 <div className="text-center mt-12 text-gray-500 dark:text-gray-400 text-sm">
                     <p>{t('premiumPage.disclaimer')}</p>

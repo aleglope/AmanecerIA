@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
 
 export type Language = 'es' | 'en';
@@ -38,7 +37,7 @@ const translations = {
     },
     "moods": { "Ansiedad": "Ansiedad", "Baja Motivación": "Baja Motivación", "Abrumado/a": "Abrumado/a", "Neutral": "Neutral", "Optimista": "Optimista" },
     "focuses": { "Autoestima": "Autoestima", "Ansiedad": "Ansiedad", "Motivación": "Motivación" },
-    "moodLabels": { "very_bad": "Muy mal", "neutral": "Neutral", "good": "Bien", "great": "Genial", "awesome": "Increíble" },
+    "moodLabels": { "very_bad": "Muy mal", "neutral": "Neutral", "ok": "Bien", "great": "Genial", "very_good": "Increíble" },
     "footer": { "copyright": "AmanecerIA. Todos los derechos reservados.", "terms": "Términos de Servicio", "privacy": "Política de Privacidad" },
     "crisisModal": { "title": "Ayuda Profesional está Disponible", "text": "Parece que estás pasando por un momento muy difícil. AmaneceIA no es una herramienta para crisis. Por favor, contacta a un profesional. No estás solo/a.", "callButton": "Llamar a Emergencias", "helpLinesButton": "Ver Líneas de Ayuda", "closeButton": "Cerrar" },
     "messageDisplay": { "placeholder": { "title": "Tu mensaje aparecerá aquí", "quote": "\"No tienes que escalar toda la montaña, solo dar el siguiente paso.\"" } },
@@ -61,6 +60,7 @@ const translations = {
       "moodTracker": { "title": "¿Cómo te sientes ahora?", "subtitle": "Registra tu estado de ánimo.", "success": "Has registrado: {mood}", "error": "No se pudo guardar tu ánimo. Inténtalo de nuevo." },
       "moodHistory": { "title": "Historial de Ánimo", "error": "No se pudo cargar el historial.", "empty": "Aún no has registrado ningún estado de ánimo." },
       "premiumPlaceholder": { "title": "Desbloquea la Conversación", "subtitle": "Responde a tu mensaje, explora tus pensamientos y accede a ejercicios guiados con Premium.", "button": "Saber más" },
+      "chatCTA": { "title": "Conversación Abierta", "subtitle": "Tu espacio para hablar. Explora tus pensamientos con tu IA de apoyo personal.", "button": "Empezar a chatear" },
       "notificationBanner": {
         "title": "Recibe tu mensaje cada mañana", "subtitle": "Activa las notificaciones para no perderte tu dosis diaria de positividad.", "button": "Activar",
         "granted": "¡Genial! Las notificaciones están activadas.",
@@ -81,11 +81,28 @@ const translations = {
         "yearly": { "title": "Anual", "period": "/año", "description": "La mejor opción para un compromiso a largo plazo.", "badge": "Ahorra un 15%" },
         "button": "Empezar prueba de 7 días"
       },
-      "disclaimer": "Puedes cancelar tu suscripción en cualquier momento. Las pruebas gratuitas son solo para nuevos usuarios."
+      "disclaimer": "Puedes cancelar tu suscripción en cualquier momento. Las pruebas gratuitas son solo para nuevos usuarios.",
+      "updateError": "No se pudo actualizar a Premium. Por favor, inténtalo de nuevo."
+    },
+    "chatPage": {
+        "title": "Tu Conversación",
+        "inputPlaceholder": "Escribe tu mensaje...",
+        "error": { "init": "Lo siento, no pude iniciar nuestra conversación. Por favor, intenta volver más tarde.", "send": "Hubo un problema al enviar tu mensaje. ¿Podrías intentarlo de nuevo?" }
+    },
+    "profileEditModal": {
+        "title": "Editar Perfil",
+        "editAriaLabel": "Editar perfil",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "errorNameRequired": "El nombre no puede estar vacío.",
+        "errorGeneric": "No se pudo actualizar el perfil. Inténtalo de nuevo."
     },
     "gemini": {
         "morningPrompt": "El usuario se ha despertado sintiéndose: \"{mood}\". Proporcionó este contexto adicional: \"{context}\". Basado en esto, genera un mensaje de apoyo y reencuadre para empezar el día.",
-        "dashboardPrompt": "El enfoque principal del usuario para hoy es \"{focus}\". Genera un mensaje inspirador y accionable que aborde directamente este enfoque para ayudarle a empezar bien el día."
+        "dashboardPrompt": "El enfoque principal del usuario para hoy es \"{focus}\". Genera un mensaje inspirador y accionable que aborde directamente este enfoque para ayudarle a empezar bien el día.",
+        "chatInitialContext": "Contexto del usuario: Su nombre es {name}. Su enfoque principal es {focus}. Sus estados de ánimo más recientes son: {moods}.",
+        "noMoods": "No se ha registrado ninguno",
+        "chatGreeting": "Hola, empecemos nuestra conversación."
     }
   },
   en: {
@@ -112,7 +129,7 @@ const translations = {
     },
     "moods": { "Ansiedad": "Anxiety", "Baja Motivación": "Low Motivation", "Abrumado/a": "Overwhelmed", "Neutral": "Neutral", "Optimista": "Optimistic" },
     "focuses": { "Autoestima": "Self-Esteem", "Ansiedad": "Anxiety", "Motivación": "Motivation" },
-    "moodLabels": { "very_bad": "Very Bad", "neutral": "Neutral", "good": "Good", "great": "Great", "awesome": "Awesome" },
+    "moodLabels": { "very_bad": "Very Bad", "neutral": "Neutral", "ok": "Good", "great": "Great", "very_good": "Awesome" },
     "footer": { "copyright": "AmanecerIA. All rights reserved.", "terms": "Terms of Service", "privacy": "Privacy Policy" },
     "crisisModal": { "title": "Professional Help is Available", "text": "It seems like you're going through a very difficult time. AmanecerIA is not a crisis tool. Please contact a professional. You are not alone.", "callButton": "Call Emergency Services", "helpLinesButton": "View Helplines", "closeButton": "Close" },
     "messageDisplay": { "placeholder": { "title": "Your message will appear here", "quote": "\"You don't have to climb the whole mountain, just take the next step.\"" } },
@@ -135,6 +152,7 @@ const translations = {
       "moodTracker": { "title": "How are you feeling now?", "subtitle": "Log your current mood.", "success": "You've logged: {mood}", "error": "Could not save your mood. Please try again." },
       "moodHistory": { "title": "Mood History", "error": "Could not load history.", "empty": "You haven't logged any moods yet." },
       "premiumPlaceholder": { "title": "Unlock the Conversation", "subtitle": "Reply to your message, explore your thoughts, and access guided exercises with Premium.", "button": "Learn more" },
+      "chatCTA": { "title": "Open Conversation", "subtitle": "Your space to talk. Explore your thoughts with your personal support AI.", "button": "Start Chatting" },
       "notificationBanner": {
         "title": "Get your message every morning", "subtitle": "Enable notifications so you don't miss your daily dose of positivity.", "button": "Enable",
         "granted": "Great! Notifications are enabled.",
@@ -155,11 +173,28 @@ const translations = {
         "yearly": { "title": "Yearly", "period": "/year", "description": "The best option for a long-term commitment.", "badge": "Save 15%" },
         "button": "Start 7-day trial"
       },
-      "disclaimer": "You can cancel your subscription at any time. Free trials are for new users only."
+      "disclaimer": "You can cancel your subscription at any time. Free trials are for new users only.",
+      "updateError": "Could not upgrade to Premium. Please try again."
+    },
+    "chatPage": {
+        "title": "Your Conversation",
+        "inputPlaceholder": "Type your message...",
+        "error": { "init": "Sorry, I couldn't start our conversation. Please try coming back later.", "send": "There was a problem sending your message. Could you please try again?" }
+    },
+    "profileEditModal": {
+        "title": "Edit Profile",
+        "editAriaLabel": "Edit profile",
+        "cancel": "Cancel",
+        "save": "Save",
+        "errorNameRequired": "Name cannot be empty.",
+        "errorGeneric": "Could not update profile. Please try again."
     },
      "gemini": {
         "morningPrompt": "The user woke up feeling: \"{mood}\". They provided this additional context: \"{context}\". Based on this, generate a supportive and reframing message to start the day.",
-        "dashboardPrompt": "The user's main focus for today is \"{focus}\". Generate an inspiring and actionable message that directly addresses this focus to help them start the day well."
+        "dashboardPrompt": "The user's main focus for today is \"{focus}\". Generate an inspiring and actionable message that directly addresses this focus to help them start the day well.",
+        "chatInitialContext": "User context: Their name is {name}. Their main focus is {focus}. Their most recent moods are: {moods}.",
+        "noMoods": "None have been logged",
+        "chatGreeting": "Hello, let's start our conversation."
     }
   }
 };
