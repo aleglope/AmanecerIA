@@ -55,8 +55,9 @@ const translations = {
     },
     "onboarding": { "step": "Paso 1 de 1", "title": "¿Cuál es el enfoque que más necesitas hoy?", "subtitle": "Puedes cambiar esto cuando quieras.", "button": "Ver mi mensaje de hoy" },
     "dashboard": {
+      "hero": { "alt": "Un amanecer sobre un campo brumoso, representando un nuevo día." },
       "profileHeader": { "greeting": "Buenos días, {name}" },
-      "messageCard": { "title": "Tu mensaje para hoy", "yourFocus": "Tu Enfoque", "loading": "Generando tu mensaje...", "errorNoFocus": "No se ha establecido un enfoque. Por favor, completa el onboarding.", "errorLoading": "No se pudo cargar tu mensaje. Inténtalo de nuevo." },
+      "messageCard": { "title": "Tu mensaje para hoy", "yourFocus": "Tu Enfoque", "loading": "Generando tu mensaje...", "errorNoFocus": "No se ha establecido un enfoque. Por favor, completa el onboarding.", "errorLoading": "No se pudo cargar tu mensaje. Inténtalo de nuevo.", "editFocusAriaLabel": "Editar enfoque" },
       "moodTracker": { "title": "¿Cómo te sientes ahora?", "subtitle": "Registra tu estado de ánimo.", "success": "Has registrado: {mood}", "error": "No se pudo guardar tu ánimo. Inténtalo de nuevo." },
       "moodHistory": { "title": "Historial de Ánimo", "error": "No se pudo cargar el historial.", "empty": "Aún no has registrado ningún estado de ánimo." },
       "premiumPlaceholder": { "title": "Desbloquea la Conversación", "subtitle": "Responde a tu mensaje, explora tus pensamientos y accede a ejercicios guiados con Premium.", "button": "Saber más" },
@@ -96,6 +97,11 @@ const translations = {
         "save": "Guardar",
         "errorNameRequired": "El nombre no puede estar vacío.",
         "errorGeneric": "No se pudo actualizar el perfil. Inténtalo de nuevo."
+    },
+    "focusEditModal": {
+        "title": "Cambia Tu Enfoque",
+        "save": "Guardar Enfoque",
+        "errorGeneric": "No se pudo actualizar el enfoque. Inténtalo de nuevo."
     },
     "gemini": {
         "morningPrompt": "El usuario se ha despertado sintiéndose: \"{mood}\". Proporcionó este contexto adicional: \"{context}\". Basado en esto, genera un mensaje de apoyo y reencuadre para empezar el día.",
@@ -147,8 +153,9 @@ const translations = {
     },
     "onboarding": { "step": "Step 1 of 1", "title": "What's the one focus you need most today?", "subtitle": "You can change this anytime.", "button": "See my message for today" },
     "dashboard": {
+      "hero": { "alt": "A sunrise over a misty field, representing a new day." },
       "profileHeader": { "greeting": "Good morning, {name}" },
-      "messageCard": { "title": "Your message for today", "yourFocus": "Your Focus", "loading": "Generating your message...", "errorNoFocus": "No focus has been set. Please complete the onboarding.", "errorLoading": "Could not load your message. Please try again." },
+      "messageCard": { "title": "Your message for today", "yourFocus": "Your Focus", "loading": "Generating your message...", "errorNoFocus": "No focus has been set. Please complete the onboarding.", "errorLoading": "Could not load your message. Please try again.", "editFocusAriaLabel": "Edit focus" },
       "moodTracker": { "title": "How are you feeling now?", "subtitle": "Log your current mood.", "success": "You've logged: {mood}", "error": "Could not save your mood. Please try again." },
       "moodHistory": { "title": "Mood History", "error": "Could not load history.", "empty": "You haven't logged any moods yet." },
       "premiumPlaceholder": { "title": "Unlock the Conversation", "subtitle": "Reply to your message, explore your thoughts, and access guided exercises with Premium.", "button": "Learn more" },
@@ -188,6 +195,11 @@ const translations = {
         "save": "Save",
         "errorNameRequired": "Name cannot be empty.",
         "errorGeneric": "Could not update profile. Please try again."
+    },
+    "focusEditModal": {
+        "title": "Change Your Focus",
+        "save": "Save Focus",
+        "errorGeneric": "Could not update focus. Please try again."
     },
      "gemini": {
         "morningPrompt": "The user woke up feeling: \"{mood}\". They provided this additional context: \"{context}\". Based on this, generate a supportive and reframing message to start the day.",

@@ -1,10 +1,13 @@
-
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { generateDashboardMessage } from '../../services/geminiService';
 import { useTranslation } from '../../context/LanguageContext';
 
-export const MessageCard: React.FC = () => {
+interface MessageCardProps {
+  onEditFocusClick: () => void;
+}
+
+export const MessageCard: React.FC<MessageCardProps> = ({ onEditFocusClick }) => {
   const { t, language } = useTranslation();
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -53,9 +56,21 @@ export const MessageCard: React.FC = () => {
     }
     return (
         <div>
-            <h3 className="text-sm font-semibold text-dawn-purple uppercase tracking-wider mb-2">
-                {t('dashboard.messageCard.yourFocus')}: {user?.focus ? t(`focuses.${user.focus}`) : ''}
-            </h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-semibold text-dawn-purple uppercase tracking-wider">
+                  {t('dashboard.messageCard.yourFocus')}: {user?.focus ? t(`focuses.${user.focus}`) : ''}
+              </h3>
+              <button 
+                  onClick={onEditFocusClick}
+                  className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors p-1 rounded-full"
+                  aria-label={t('dashboard.messageCard.editFocusAriaLabel')}
+              >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                      <path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" />
+                  </svg>
+              </button>
+            </div>
             <p className="text-gray-700 dark:text-gray-300 text-lg">{message}</p>
         </div>
     );

@@ -10,11 +10,13 @@ import { NotificationBanner } from '../components/dashboard/NotificationBanner';
 import { MoodHistory } from '../components/dashboard/MoodHistory';
 import { AuthContext } from '../context/AuthContext';
 import { ChatCTA } from '../components/dashboard/ChatCTA';
+import { FocusEditModal } from '../components/dashboard/FocusEditModal';
 
 export default function Dashboard() {
     const { user } = useContext(AuthContext);
     const [view, setView] = useState<'dashboard' | 'premium' | 'chat'>('dashboard');
     const [moodUpdateTrigger, setMoodUpdateTrigger] = useState(0);
+    const [isFocusEditModalOpen, setIsFocusEditModalOpen] = useState(false);
 
     const handleMoodSaved = () => {
         setMoodUpdateTrigger(prev => prev + 1);
@@ -36,7 +38,7 @@ export default function Dashboard() {
                 <NotificationBanner />
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2">
-                        <MessageCard />
+                        <MessageCard onEditFocusClick={() => setIsFocusEditModalOpen(true)} />
                     </div>
                     <div className="lg:col-span-1 space-y-8">
                         <MoodTracker onMoodSaved={handleMoodSaved} />
@@ -49,6 +51,10 @@ export default function Dashboard() {
                     </div>
                 </div>
             </main>
+            <FocusEditModal 
+                isOpen={isFocusEditModalOpen}
+                onClose={() => setIsFocusEditModalOpen(false)}
+            />
         </div>
     );
 }

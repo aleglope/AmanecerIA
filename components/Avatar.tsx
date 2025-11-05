@@ -1,4 +1,3 @@
-
 import React, { useContext, useRef, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
@@ -94,7 +93,7 @@ export const Avatar: React.FC<AvatarProps> = ({ size = 'md', editable = false, o
   return (
     <div className={`relative group shrink-0 ${className}`}>
       <div
-        className={`relative rounded-full flex items-center justify-center bg-dawn-purple text-white font-bold overflow-hidden ${sizeClasses[size]} ${editable ? 'cursor-pointer' : ''}`}
+        className={`relative rounded-2xl flex items-center justify-center bg-dawn-purple text-white font-bold overflow-hidden ${sizeClasses[size]} ${editable ? 'cursor-pointer' : ''}`}
         onClick={handleAvatarClick}
       >
         {user.photoURL ? (
