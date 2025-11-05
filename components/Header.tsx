@@ -3,6 +3,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Avatar } from './Avatar';
 import { useTranslation } from '../context/LanguageContext';
+import { AmanecerIALogo } from './AmanecerIALogo';
 
 interface HeaderProps {
   onLoginClick?: () => void;
@@ -37,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({ onLoginClick, onRegisterClick })
       <div className="container mx-auto px-6 py-3">
         <div className="flex items-center justify-between">
           <div className="flex-shrink-0">
-             <img className="h-12" src="/logo.png" alt="AmanecerIA Logo" />
+             <AmanecerIALogo size="h-12" />
           </div>
           <div className="flex items-center space-x-1 md:space-x-2">
             <LanguageSwitcher />

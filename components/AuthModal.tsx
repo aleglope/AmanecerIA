@@ -1,8 +1,8 @@
-
 import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { LoadingSpinner } from './LoadingSpinner';
 import { useTranslation } from '../context/LanguageContext';
+import { AmanecerIALogo } from './AmanecerIALogo';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -154,7 +154,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultVi
         {showConfirmationMessage ? (
           <div>
               <div className="flex justify-center mb-4">
-                <img src="/logo.png" alt="AmanecerIA Logo" className="h-16" />
+                <AmanecerIALogo size="h-16" />
               </div>
               <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-night-text mb-2">{t('auth.confirmation.title')}</h2>
               <p className="text-center text-gray-500 dark:text-gray-400 mb-6">
@@ -167,7 +167,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultVi
         ) : (
           <>
             <div className="flex justify-center mb-4">
-                <img src="/logo.png" alt="AmanecerIA Logo" className="h-16" />
+                <AmanecerIALogo size="h-16" />
             </div>
 
             <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-night-text mb-2">
