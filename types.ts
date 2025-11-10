@@ -7,6 +7,14 @@ export type DashboardMoodLabel = 'very_bad' | 'neutral' | 'ok' | 'great' | 'very
 
 export type EmojiMood = { emoji: string; labelKey: DashboardMoodLabel; };
 
+export type NotificationTone = 'Amable' | 'Directo' | 'Motivador';
+export type NotificationLength = 'Corto' | 'Medio' | 'Detallado';
+
+export type NotificationPreferences = {
+  tone: NotificationTone;
+  length: NotificationLength;
+};
+
 export type User = {
   id: string;
   name?: string;
@@ -14,4 +22,6 @@ export type User = {
   focus?: Focus;
   photoURL?: string;
   is_premium?: boolean;
+  pushSubscription?: PushSubscription | null;
+  notificationPreferences?: NotificationPreferences;
 };

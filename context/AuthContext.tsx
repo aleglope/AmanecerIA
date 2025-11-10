@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import { User, Focus } from '../types';
+import { User, Focus, NotificationPreferences, NotificationTone, NotificationLength } from '../types';
 import { supabase } from '../supabaseClient';
-import { Session } from '@supabase/supabase-js';
+import { Session, PushSubscription } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
@@ -15,6 +15,8 @@ interface AuthContextType {
   resendConfirmationEmail: (email: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   updateUserToPremium: () => Promise<void>;
+  updateUserPushSubscription: (subscription: PushSubscription | null) => Promise<void>;
+  updateUserNotificationPreferences: (preferences: NotificationPreferences) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -29,6 +31,8 @@ export const AuthContext = createContext<AuthContextType>({
   resendConfirmationEmail: async () => {},
   loginWithGoogle: async () => {},
   updateUserToPremium: async () => {},
+  updateUserPushSubscription: async () => {},
+  updateUserNotificationPreferences: async () => {},
 });
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -39,9 +43,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session: Session | null) => {
       setLoading(true);
       if (session) {
+        // First, fetch the core profile data.
         const { data: profile, error } = await supabase
           .from('profiles')
-          .select('name, focus, photo_url, is_premium')
+          .select('name, focus, photo_url, is_premium, notification_preferences')
           .eq('id', session.user.id)
           .single();
 
@@ -64,12 +69,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               focus: undefined,
               photoURL: undefined,
               is_premium: false,
+              pushSubscription: null,
+              notificationPreferences: { tone: 'Amable', length: 'Medio' },
             });
           }
         } else if (error) {
-          console.error("Error fetching profile:", error);
+          console.error("Error fetching core profile:", error);
           setUser(null);
         } else {
+          // Core profile fetched. Now, try to get the push subscription.
+          let pushSub: PushSubscription | null = null;
+          const { data: subData, error: subError } = await supabase
+              .from('profiles')
+              .select('push_subscription')
+              .eq('id', session.user.id)
+              .single();
+
+          // Ignore the specific error for a missing column. Log other errors.
+          if (subError && !subError.message.includes('column "push_subscription" does not exist')) {
+            console.error("Error fetching push subscription:", subError);
+          } else if (!subError && subData) {
+              pushSub = subData.push_subscription as PushSubscription | null;
+          }
+
           setUser({
             id: session.user.id,
             email: session.user.email,
@@ -77,6 +99,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             focus: profile?.focus as Focus,
             photoURL: profile?.photo_url,
             is_premium: profile?.is_premium,
+            pushSubscription: pushSub,
+            notificationPreferences: profile?.notification_preferences || { tone: 'Amable', length: 'Medio' },
           });
         }
       } else {
@@ -146,6 +170,38 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     }
   };
+  
+  const updateUserNotificationPreferences = async (preferences: NotificationPreferences) => {
+    if (user) {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ notification_preferences: preferences, updated_at: new Date() })
+        .eq('id', user.id);
+      
+      if (error) {
+        console.error("Error updating notification preferences:", error);
+        throw error;
+      } else {
+        setUser({ ...user, notificationPreferences: preferences });
+      }
+    }
+  };
+
+  const updateUserPushSubscription = async (subscription: PushSubscription | null) => {
+    if (user) {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ push_subscription: subscription, updated_at: new Date() })
+        .eq('id', user.id);
+      
+      if (error) {
+        console.error("Error updating push subscription:", error);
+        throw error;
+      } else {
+        setUser({ ...user, pushSubscription: subscription });
+      }
+    }
+  };
 
   const updateUserProfilePicture = async (photoUrl: string) => {
     if (!user) {
@@ -160,7 +216,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     if (error) {
       console.error("Error updating profile picture URL:", error);
-      throw new Error("Could not update profile picture.");
+      throw error;
     }
 
     if (!data || data.length === 0) {
@@ -223,6 +279,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     resendConfirmationEmail,
     loginWithGoogle,
     updateUserToPremium,
+    updateUserPushSubscription,
+    updateUserNotificationPreferences
   };
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;

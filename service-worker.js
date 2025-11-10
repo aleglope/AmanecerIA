@@ -1,9 +1,24 @@
-
 // service-worker.js
 
 self.addEventListener('push', event => {
+  let data = {
+    title: 'AmanecerIA',
+    body: '☀️ Tu mensaje diario está listo para ti. Ábrelo para empezar el día con una mentalidad positiva.'
+  };
+
+  if (event.data) {
+    try {
+      const payload = event.data.json();
+      data.title = payload.title || data.title;
+      data.body = payload.body || data.body;
+    } catch (e) {
+      console.warn('Push data is not JSON, treating as text.', e);
+      data.body = event.data.text();
+    }
+  }
+
   const options = {
-    body: '☀️ Tu mensaje diario está listo para ti. Ábrelo para empezar el día con una mentalidad positiva.',
+    body: data.body,
     icon: '/icon-192.png',
     badge: '/icon-192.png',
     vibrate: [200, 100, 200],
@@ -15,7 +30,7 @@ self.addEventListener('push', event => {
   };
 
   event.waitUntil(
-    self.registration.showNotification('AmanecerIA', options)
+    self.registration.showNotification(data.title, options)
   );
 });
 

@@ -38,6 +38,8 @@ const translations = {
     "moods": { "Ansiedad": "Ansiedad", "Baja Motivación": "Baja Motivación", "Abrumado/a": "Abrumado/a", "Neutral": "Neutral", "Optimista": "Optimista" },
     "focuses": { "Autoestima": "Autoestima", "Ansiedad": "Ansiedad", "Motivación": "Motivación" },
     "moodLabels": { "very_bad": "Muy mal", "neutral": "Neutral", "ok": "Bien", "great": "Genial", "very_good": "Increíble" },
+    "notificationTones": { "Amable": "Amable", "Directo": "Directo", "Motivador": "Motivador" },
+    "notificationLengths": { "Corto": "Corto", "Medio": "Medio", "Detallado": "Detallado" },
     "footer": { "copyright": "AmanecerIA. Todos los derechos reservados.", "terms": "Términos de Servicio", "privacy": "Política de Privacidad" },
     "crisisModal": { "title": "Ayuda Profesional está Disponible", "text": "Parece que estás pasando por un momento muy difícil. AmaneceIA no es una herramienta para crisis. Por favor, contacta a un profesional. No estás solo/a.", "callButton": "Llamar a Emergencias", "helpLinesButton": "Ver Líneas de Ayuda", "closeButton": "Cerrar" },
     "messageDisplay": { "placeholder": { "title": "Tu mensaje aparecerá aquí", "quote": "\"No tienes que escalar toda la montaña, solo dar el siguiente paso.\"" } },
@@ -53,7 +55,16 @@ const translations = {
       "resentSuccess": "¡Correo de confirmación reenviado con éxito a <strong>{email}</strong>!",
       "errors": { "missingFields": "Por favor, introduce tu email y contraseña.", "missingFieldsAll": "Por favor, completa todos los campos.", "resendFailed": "Error al reenviar el correo. Inténtalo de nuevo.", "invalidCredentials": "El correo electrónico o la contraseña son incorrectos. Por favor, inténtalo de nuevo.", "generic": "Ha ocurrido un error. Revisa tus datos o inténtalo más tarde." }
     },
-    "onboarding": { "step": "Paso 1 de 1", "title": "¿Cuál es el enfoque que más necesitas hoy?", "subtitle": "Puedes cambiar esto cuando quieras.", "button": "Ver mi mensaje de hoy" },
+    "onboarding": {
+      "step1": "Paso 1 de 2", "step2": "Paso 2 de 2",
+      "title": "¿Cuál es el enfoque que más necesitas hoy?", "subtitle": "Puedes cambiar esto cuando quieras.", "button": "Continuar",
+      "notifications": {
+        "title": "Un último paso",
+        "subtitle": "Activa las notificaciones para recibir tu mensaje personalizado cada mañana. Es el corazón de AmanecerIA.",
+        "activateButton": "Activar Notificaciones",
+        "skipButton": "Quizás más tarde"
+      }
+    },
     "dashboard": {
       "hero": { "alt": "Un amanecer sobre un campo brumoso, representando un nuevo día." },
       "profileHeader": { "greeting": "Buenos días, {name}" },
@@ -64,13 +75,14 @@ const translations = {
       "chatCTA": { "title": "Conversación Abierta", "subtitle": "Tu espacio para hablar. Explora tus pensamientos con tu IA de apoyo personal.", "button": "Empezar a chatear" },
       "notificationBanner": {
         "title": "Recibe tu mensaje cada mañana", "subtitle": "Activa las notificaciones para no perderte tu dosis diaria de positividad.", "button": "Activar",
-        "granted": "¡Genial! Las notificaciones están activadas.",
+        "activating": "Activando...",
+        "granted": "¡Suscripción activada! Recibirás tu mensaje cada mañana.",
         "deniedTitle": "Has bloqueado las notificaciones.", "deniedSubtitle": "Para recibirlas, debes activarlas en los ajustes de tu navegador."
       }
     },
     "avatar": { "errorFormat": "Formato no válido. Sube un archivo JPG o PNG.", "errorSize": "El archivo es muy grande. El tamaño máximo es de {size}MB.", "errorUpload": "Hubo un error al subir la imagen." },
     "premiumPage": {
-      "backButton": "Volver al Panel", "title": "Eleva tu Bienestar con Premium", "subtitle": "Transforma tu apoyo matutino en una conversación continua. Profundiza, aprende y crece con herramientas exclusivas diseñadas para ti.",
+      "backButton": "Volver", "title": "Eleva tu Bienestar con Premium", "subtitle": "Transforma tu apoyo matutino en una conversación continua. Profundiza, aprende y crece con herramientas exclusivas diseñadas para ti.",
       "features": {
         "one": { "title": "IA Conversacional", "description": "Dialoga con tu IA para explorar tus pensamientos y recibir apoyo continuo." },
         "two": { "title": "Personalización Avanzada", "description": "La IA aprende de ti y adapta los mensajes futuros a tu progreso personal." },
@@ -102,6 +114,21 @@ const translations = {
         "title": "Cambia Tu Enfoque",
         "save": "Guardar Enfoque",
         "errorGeneric": "No se pudo actualizar el enfoque. Inténtalo de nuevo."
+    },
+    "settingsPage": {
+      "title": "Ajustes",
+      "profileSection": { "title": "Perfil" },
+      "notificationsSection": {
+          "title": "Ajustes de Notificación",
+          "enableLabel": "Notificaciones diarias",
+          "enableDescription": "Recibe un mensaje personalizado cada mañana.",
+          "preferencesTitle": "Preferencias del Mensaje",
+          "toneLabel": "Tono",
+          "lengthLabel": "Longitud"
+      },
+      "saveButton": "Guardar Cambios",
+      "successMessage": "Ajustes guardados con éxito.",
+      "errorMessage": "No se pudieron guardar los ajustes. Inténtalo de nuevo."
     },
     "gemini": {
         "morningPrompt": "El usuario se ha despertado sintiéndose: \"{mood}\". Proporcionó este contexto adicional: \"{context}\". Basado en esto, genera un mensaje de apoyo y reencuadre para empezar el día.",
@@ -136,6 +163,8 @@ const translations = {
     "moods": { "Ansiedad": "Anxiety", "Baja Motivación": "Low Motivation", "Abrumado/a": "Overwhelmed", "Neutral": "Neutral", "Optimista": "Optimistic" },
     "focuses": { "Autoestima": "Self-Esteem", "Ansiedad": "Anxiety", "Motivación": "Motivation" },
     "moodLabels": { "very_bad": "Very Bad", "neutral": "Neutral", "ok": "Good", "great": "Great", "very_good": "Awesome" },
+    "notificationTones": { "Amable": "Friendly", "Directo": "Direct", "Motivador": "Motivating" },
+    "notificationLengths": { "Corto": "Short", "Medio": "Medium", "Detallado": "Detailed" },
     "footer": { "copyright": "AmanecerIA. All rights reserved.", "terms": "Terms of Service", "privacy": "Privacy Policy" },
     "crisisModal": { "title": "Professional Help is Available", "text": "It seems like you're going through a very difficult time. AmanecerIA is not a crisis tool. Please contact a professional. You are not alone.", "callButton": "Call Emergency Services", "helpLinesButton": "View Helplines", "closeButton": "Close" },
     "messageDisplay": { "placeholder": { "title": "Your message will appear here", "quote": "\"You don't have to climb the whole mountain, just take the next step.\"" } },
@@ -151,7 +180,16 @@ const translations = {
       "resentSuccess": "Confirmation email successfully resent to <strong>{email}</strong>!",
       "errors": { "missingFields": "Please enter your email and password.", "missingFieldsAll": "Please fill out all fields.", "resendFailed": "Failed to resend email. Please try again.", "invalidCredentials": "Invalid email or password. Please try again.", "generic": "An error occurred. Please check your details or try again later." }
     },
-    "onboarding": { "step": "Step 1 of 1", "title": "What's the one focus you need most today?", "subtitle": "You can change this anytime.", "button": "See my message for today" },
+    "onboarding": {
+      "step1": "Step 1 of 2", "step2": "Step 2 of 2",
+      "title": "What's the one focus you need most today?", "subtitle": "You can change this anytime.", "button": "Continue",
+      "notifications": {
+          "title": "One last step",
+          "subtitle": "Enable notifications to receive your personalized message each morning. It's the heart of AmanecerIA.",
+          "activateButton": "Enable Notifications",
+          "skipButton": "Maybe later"
+      }
+    },
     "dashboard": {
       "hero": { "alt": "A sunrise over a misty field, representing a new day." },
       "profileHeader": { "greeting": "Good morning, {name}" },
@@ -162,13 +200,14 @@ const translations = {
       "chatCTA": { "title": "Open Conversation", "subtitle": "Your space to talk. Explore your thoughts with your personal support AI.", "button": "Start Chatting" },
       "notificationBanner": {
         "title": "Get your message every morning", "subtitle": "Enable notifications so you don't miss your daily dose of positivity.", "button": "Enable",
-        "granted": "Great! Notifications are enabled.",
+        "activating": "Enabling...",
+        "granted": "Subscription activated! You'll receive your message every morning.",
         "deniedTitle": "You've blocked notifications.", "deniedSubtitle": "To receive them, you need to enable them in your browser settings."
       }
     },
     "avatar": { "errorFormat": "Invalid format. Please upload a JPG or PNG.", "errorSize": "File is too large. Max size is {size}MB.", "errorUpload": "There was an error uploading the image." },
     "premiumPage": {
-      "backButton": "Back to Dashboard", "title": "Elevate Your Well-being with Premium", "subtitle": "Transform your morning support into an ongoing conversation. Go deeper, learn, and grow with exclusive tools designed for you.",
+      "backButton": "Back", "title": "Elevate Your Well-being with Premium", "subtitle": "Transform your morning support into an ongoing conversation. Go deeper, learn, and grow with exclusive tools designed for you.",
       "features": {
         "one": { "title": "Conversational AI", "description": "Chat with your AI to explore your thoughts and receive continuous support." },
         "two": { "title": "Advanced Personalization", "description": "The AI learns from you and adapts future messages to your personal progress." },
@@ -200,6 +239,21 @@ const translations = {
         "title": "Change Your Focus",
         "save": "Save Focus",
         "errorGeneric": "Could not update focus. Please try again."
+    },
+     "settingsPage": {
+      "title": "Settings",
+      "profileSection": { "title": "Profile" },
+      "notificationsSection": {
+          "title": "Notification Settings",
+          "enableLabel": "Daily notifications",
+          "enableDescription": "Receive a personalized message every morning.",
+          "preferencesTitle": "Message Preferences",
+          "toneLabel": "Tone",
+          "lengthLabel": "Length"
+      },
+      "saveButton": "Save Changes",
+      "successMessage": "Settings saved successfully.",
+      "errorMessage": "Could not save settings. Please try again."
     },
      "gemini": {
         "morningPrompt": "The user woke up feeling: \"{mood}\". They provided this additional context: \"{context}\". Based on this, generate a supportive and reframing message to start the day.",
@@ -235,7 +289,12 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     for (const k of keys) {
       result = result?.[k];
       if (result === undefined) {
-        return key; // Return the key if translation is not found
+        // Fallback to English if key not found in current language
+        result = translations['en'];
+         for (const fk of keys) {
+            result = result?.[fk];
+            if(result === undefined) return key;
+         }
       }
     }
     

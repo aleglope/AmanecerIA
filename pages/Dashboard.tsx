@@ -5,6 +5,7 @@ import { MoodTracker } from '../components/dashboard/MoodTracker';
 import { PremiumPlaceholder } from '../components/dashboard/PremiumPlaceholder';
 import PremiumPlansPage from './PremiumPlansPage';
 import ChatPage from './ChatPage';
+import SettingsPage from './SettingsPage';
 import { ProfileHeader } from '../components/dashboard/ProfileHeader';
 import { NotificationBanner } from '../components/dashboard/NotificationBanner';
 import { MoodHistory } from '../components/dashboard/MoodHistory';
@@ -14,7 +15,7 @@ import { FocusEditModal } from '../components/dashboard/FocusEditModal';
 
 export default function Dashboard() {
     const { user } = useContext(AuthContext);
-    const [view, setView] = useState<'dashboard' | 'premium' | 'chat'>('dashboard');
+    const [view, setView] = useState<'dashboard' | 'premium' | 'chat' | 'settings'>('dashboard');
     const [moodUpdateTrigger, setMoodUpdateTrigger] = useState(0);
     const [isFocusEditModalOpen, setIsFocusEditModalOpen] = useState(false);
 
@@ -29,10 +30,14 @@ export default function Dashboard() {
     if (view === 'chat') {
         return <ChatPage onBack={() => setView('dashboard')} />;
     }
+    
+    if (view === 'settings') {
+        return <SettingsPage onBack={() => setView('dashboard')} />;
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-night-blue">
-            <Header />
+            <Header onSettingsClick={() => setView('settings')} />
             <main className="container mx-auto px-4 sm:px-6 py-8">
                 <ProfileHeader />
                 <NotificationBanner />

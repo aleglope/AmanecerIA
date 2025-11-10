@@ -1,4 +1,4 @@
-import { Mood, Focus, EmojiMood, DashboardMoodLabel } from './types';
+import { Mood, Focus, EmojiMood, DashboardMoodLabel, NotificationTone, NotificationLength } from './types';
 
 export const MOOD_OPTIONS: Mood[] = [
   'Ansiedad',
@@ -13,6 +13,10 @@ export const FOCUS_OPTIONS: Focus[] = [
   'Ansiedad',
   'Motivación',
 ];
+
+export const NOTIFICATION_TONES: NotificationTone[] = ['Amable', 'Directo', 'Motivador'];
+export const NOTIFICATION_LENGTHS: NotificationLength[] = ['Corto', 'Medio', 'Detallado'];
+
 
 export const DASHBOARD_MOODS: EmojiMood[] = [
     { emoji: '😞', labelKey: 'very_bad' },
