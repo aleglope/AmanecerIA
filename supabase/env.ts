@@ -1,2 +1,2 @@
-export const SUPABASE_URL = 'https://cpmvrurguqnauychclmz.supabase.co';
-export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwbXZydXJndXFuYXV5Y2hjbG16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNjU2NzYsImV4cCI6MjA3Nzg0MTY3Nn0.2WuSKLflDZ36oFEWnfoAUAf0Oq9hFQLNuwVChy1oqG8';
+export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;

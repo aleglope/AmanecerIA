@@ -2,7 +2,14 @@ import { GoogleGenAI, Chat } from "@google/genai";
 import { Focus, NotificationPreferences } from "../types";
 import type { Language } from "../context/LanguageContext";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const apiKey =
+  import.meta.env.VITE_GEMINI_API_KEY ||
+  process.env.API_KEY ||
+  process.env.GEMINI_API_KEY;
+if (!apiKey) {
+  console.error("Gemini API Key is missing. Please check your .env file.");
+}
+const ai = new GoogleGenAI({ apiKey });
 const model = "gemini-2.5-flash";
 
 const getSystemInstruction = (
