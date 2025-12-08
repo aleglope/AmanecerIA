@@ -84,7 +84,10 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="lg:col-span-1 space-y-8">
-            <MoodHistory refreshTrigger={moodUpdateTrigger} />
+            <MoodHistory
+              refreshTrigger={moodUpdateTrigger}
+              onUnlockClick={() => setView("premium")}
+            />
           </div>
         </div>
       </main>
