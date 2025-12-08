@@ -143,7 +143,7 @@ export const MoodHistory: React.FC<MoodHistoryProps> = ({
         </div>
 
         {!user.is_premium && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-white/30 dark:bg-black/30 backdrop-blur-[2px] rounded-xl">
+          <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-white/60 dark:bg-gray-900/60 backdrop-blur-[3px] rounded-xl">
             <p className="text-gray-800 dark:text-white font-semibold mb-2 text-center px-4">
               {t("dashboard.moodHistory.premiumChartTitle")}
             </p>
