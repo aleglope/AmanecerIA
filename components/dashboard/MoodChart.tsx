@@ -20,28 +20,44 @@ interface MoodChartProps {
 }
 
 const MOOD_VALUES: Record<string, number> = {
+  // Current values (from constants.ts MOOD_MAP)
+  Increíble: 5,
+  Genial: 4,
+  Bien: 3,
+  Neutral: 2,
+  "Muy mal": 1,
+
+  // Legacy/Fallback values
   Radiante: 5,
   Feliz: 4,
-  Bien: 3,
+  Optimista: 4,
   Cansado: 2,
+  "Baja Motivación": 2,
   Triste: 1,
   Ansiedad: 1,
   Enojado: 1,
   Estresado: 1,
+  "Abrumado/a": 1,
 };
+
+import { REVERSE_MOOD_MAP } from "../../constants";
 
 export const MoodChart: React.FC<MoodChartProps> = ({ data }) => {
   const { t } = useTranslation();
 
   const chartData = useMemo(() => {
     // Take last 7 entries and reverse to show chronological order
-    return [...data].reverse().map((entry) => ({
-      date: new Date(entry.created_at).toLocaleDateString(undefined, {
-        weekday: "short",
-      }),
-      value: MOOD_VALUES[entry.mood_label] || 3, // Default to 'Bien' if unknown
-      label: t(`moodLabels.${entry.mood_label}`),
-    }));
+    return [...data].reverse().map((entry) => {
+      const moodKey = REVERSE_MOOD_MAP[entry.mood_label] || "neutral";
+      return {
+        date: new Date(entry.created_at).toLocaleDateString(undefined, {
+          day: "numeric",
+          month: "short",
+        }),
+        value: MOOD_VALUES[entry.mood_label] || 3, // Default to 'Bien' if unknown
+        label: t(`moodLabels.${moodKey}`),
+      };
+    });
   }, [data, t]);
 
   if (data.length < 2) {

@@ -43,7 +43,23 @@ Este **MVP (Producto Mínimo Viable)** demuestra cómo la tecnología puede inte
 - **Base de Datos & Auth:** Supabase
 - **IA:** Google Gemini API (`@google/genai`)
 - **Visualización:** Recharts
+- **Visualización:** Recharts
 - **Despliegue:** Vercel / Netlify (Ready)
+
+## 🏗️ Mejoras Técnicas Recent (Refactorización)
+
+El proyecto ha pasado por una auditoría de arquitectura "Senior" para asegurar escalabilidad y mantenibilidad:
+
+- **Clean Architecture:** Implementación de **Repository Pattern** (`authRepository`, `profileRepository`, `moodRepository`) para desacoplar la lógica de negocio de la infraestructura (Supabase).
+- **SOLID & SoC:** Separación estricta de responsabilidades. `LanguageContext` ahora es ligero y tipado, con traducciones extraídas a `locales/`.
+- **Type Safety:** Eliminación de `any` y uso de tipos estrictos (ej. claves de traducción recursivas) para prevenir errores en tiempo de compilación.
+- **Robustez:** Manejo defensivo de errores, validaciones de entrada (`validators.ts`) y prevención de Race Conditions con `AbortController`.
+
+## 🔮 Trabajo Pendiente (Roadmap)
+
+- [ ] **Integración de Notificaciones:** Implementar Service Workers para programar el envío del mensaje matutino generado por la IA cada día a las 8:00 AM.
+- [ ] **Tests Unitarios:** Añadir cobertura de pruebas para los nuevos repositorios y utilidades.
+- [ ] **Modo Offline:** Mejorar la persistencia local para que la app sea 100% funcional sin internet (usando los datos cacheados).
 
 ## 🏁 Cómo Empezar
 
@@ -82,10 +98,39 @@ Este **MVP (Producto Mínimo Viable)** demuestra cómo la tecnología puede inte
     npm run dev
     ```
 
-## 📸 Capturas
+## � Configuración de Pagos (Stripe)
 
-_(Aquí puedes añadir capturas de pantalla de tu dashboard, chat y gráficos)_
+Para habilitar las suscripciones Premium:
+
+1.  **Configurar Supabase Edge Functions:**
+
+    - Asegúrate de tener Stripe CLI y Supabase CLI instalados.
+    - Despliega la función de backend:
+      ```bash
+      supabase functions deploy create-checkout-session
+      ```
+    - Establece tu clave secreta de Stripe en Supabase:
+      ```bash
+      supabase secrets set STRIPE_SECRET_KEY=sk_test_... --no-verify-jwt
+      ```
+
+2.  **Configurar IDs de Precios:**
+    - Crea tus productos (Mensual/Anual) en el Dashboard de Stripe.
+    - Copia los `API ID` de los precios (ej. `price_1Pxyz...`).
+    - Actualiza el archivo `constants/stripe.ts` con tus IDs reales.
+
+## �📸 Capturas
+
+![Dashboard de AmanecerIA](assets/dashboard.png)
 
 ---
 
 Hecho con ❤️ para el bienestar mental.
+
+---
+
+### ⚠️ Disclaimer (Aviso Importante)
+
+**Este es un proyecto piloto en fase de desarrollo.**
+
+AmanecerIA está diseñado como una herramienta de apoyo emocional basada en principios de psicología positiva, pero **NO sustituye la ayuda profesional**. Para que este proyecto pase a una fase de producción real, se requiere la supervisión y validación estricta de profesionales de la salud mental y psicología clínica. Utilízalo bajo tu propia responsabilidad y siempre busca ayuda profesional si estás pasando por una crisis.

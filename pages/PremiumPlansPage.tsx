@@ -1,33 +1,11 @@
-import React, { useContext, useState } from 'react';
-import { Header } from '../components/Header';
-import { Footer } from '../components/Footer';
-import { FeatureListItem } from '../components/premium/FeatureListItem';
-import { PricingCard } from '../components/premium/PricingCard';
-import { useTranslation } from '../context/LanguageContext';
-import { AuthContext } from '../context/AuthContext';
-
-
-interface PremiumPlansPageProps {
-    onBack: () => void;
-}
-
-const PremiumPlansPage: React.FC<PremiumPlansPageProps> = ({ onBack }) => {
-    const { t } = useTranslation();
-    const { updateUserToPremium } = useContext(AuthContext);
-    const [isUpdating, setIsUpdating] = useState(false);
-    const [error, setError] = useState('');
-
-    const handleSelectPlan = async () => {
-        setIsUpdating(true);
-        setError('');
-        try {
-            await updateUserToPremium();
-            onBack();
-        } catch (err) {
-            setError(t('premiumPage.updateError'));
+            
+            // Redirect to Stripe
+            window.location.href = url;
+            
+        } catch (err: any) {
+            setError(t('premiumPage.updateError') + " " + (err.message || ""));
             console.error(err);
-        } finally {
-            setIsUpdating(false);
+            setIsUpdating(false); // Only stop loading if we failed to redirect
         }
     };
 
@@ -37,19 +15,6 @@ const PremiumPlansPage: React.FC<PremiumPlansPageProps> = ({ onBack }) => {
             <main className="container mx-auto px-4 sm:px-6 py-12">
                 <button onClick={onBack} className="flex items-center text-gray-600 dark:text-gray-300 hover:text-night-blue dark:hover:text-white font-semibold mb-8">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    {t('premiumPage.backButton')}
-                </button>
-                
-                <div className="text-center mb-12">
-                    <h1 className="text-4xl md:text-5xl font-bold text-gray-800 dark:text-night-text">{t('premiumPage.title')}</h1>
-                    <p className="text-lg text-gray-600 dark:text-gray-300 mt-4 max-w-3xl mx-auto">
-                        {t('premiumPage.subtitle')}
-                    </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
                     <FeatureListItem
                         icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>}
                         title={t('premiumPage.features.one.title')}
@@ -78,7 +43,7 @@ const PremiumPlansPage: React.FC<PremiumPlansPageProps> = ({ onBack }) => {
                         price="4.99€"
                         period={t('premiumPage.pricing.monthly.period')}
                         description={t('premiumPage.pricing.monthly.description')}
-                        onSelect={handleSelectPlan}
+                        onSelect={() => handleSelectPlan('monthly')}
                         isLoading={isUpdating}
                     />
                     <PricingCard 
@@ -88,7 +53,7 @@ const PremiumPlansPage: React.FC<PremiumPlansPageProps> = ({ onBack }) => {
                         description={t('premiumPage.pricing.yearly.description')}
                         badge={t('premiumPage.pricing.yearly.badge')}
                         isRecommended={true}
-                        onSelect={handleSelectPlan}
+                        onSelect={() => handleSelectPlan('yearly')}
                         isLoading={isUpdating}
                     />
                 </div>

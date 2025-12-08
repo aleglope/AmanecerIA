@@ -1,0 +1,23 @@
+feat: complete stripe integration, refactor i18n, and fix critical bugs
+
+This commit bundles several major improvements and fixes:
+
+🚀 Features (Stripe Integration):
+- Added `supabase/functions/create-checkout-session` for backend payment logic.
+- Created `subscriptionRepository` to handle checkout session creation.
+- Updated `PremiumPlansPage` to initiate real Stripe Checkout flows.
+- Added `constants/stripe.ts` for configuration.
+
+♻️ Refactor (Architecture & i18n):
+- Extracted translations from `LanguageContext` to `locales/es.ts` and `locales/en.ts`.
+- Implemented strict typing for translation keys.
+- Refactored `MoodHistory` to use `moodRepository` (Dependency Inversion).
+
+🐛 Fixes & Robustness:
+- **Gemini API**: Added specific handling for `429 Resource Exhausted` quota errors in `geminiService` and `ChatPage`.
+- **Auth**: Fixed logout race condition in `AuthContext` to ensure local session clearing.
+- **Navigation**: Fixed broken navigation in `MoodHistory` "Unlock" button.
+
+📚 Documentation & Config:
+- Updated `README.md` with latest patterns, Stripe setup guide, and dashboard image.
+- Updated `vite.config.ts` to use port 4000.

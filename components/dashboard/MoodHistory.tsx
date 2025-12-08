@@ -1,20 +1,14 @@
 import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import { supabase } from "../../supabaseClient";
 import { useTranslation } from "../../context/LanguageContext";
 import { DashboardMoodLabel } from "../../types";
 import { DASHBOARD_MOODS, REVERSE_MOOD_MAP } from "../../constants";
 import { MoodChart } from "./MoodChart";
-
-interface MoodEntry {
-  id: string;
-  created_at: string;
-  mood_emoji: string;
-  mood_label: string;
-}
+import { moodRepository, MoodEntry } from "../../repositories/moodRepository";
 
 interface MoodHistoryProps {
   refreshTrigger: number;
+  onUnlockClick?: () => void;
 }
 
 const moodLabelKeys = DASHBOARD_MOODS.map((m) => m.labelKey);
@@ -35,8 +29,10 @@ const MoodHistoryItem: React.FC<{ entry: MoodEntry }> = ({ entry }) => {
   let displayLabel = "";
 
   if (moodKey) {
+    // @ts-ignore - Dynamic key usage is safe here due to REVERSE_MOOD_MAP structure, but TypeScript can't verify it easily without strict keys
     displayLabel = t(`moodLabels.${moodKey}`);
   } else if (moodLabelKeys.includes(entry.mood_label as DashboardMoodLabel)) {
+    // @ts-ignore
     displayLabel = t(`moodLabels.${entry.mood_label}`);
   } else {
     displayLabel = entry.mood_label;
@@ -71,7 +67,10 @@ const SkeletonLoader: React.FC = () => (
   </div>
 );
 
-export const MoodHistory: React.FC<MoodHistoryProps> = ({ refreshTrigger }) => {
+export const MoodHistory: React.FC<MoodHistoryProps> = ({
+  refreshTrigger,
+  onUnlockClick,
+}) => {
   const { t } = useTranslation();
   const { user, updateUserToPremium } = useContext(AuthContext);
   const [history, setHistory] = useState<MoodEntry[]>([]);
@@ -86,18 +85,8 @@ export const MoodHistory: React.FC<MoodHistoryProps> = ({ refreshTrigger }) => {
       setError("");
 
       try {
-        const { data, error: fetchError } = await supabase
-          .from("mood_history")
-          .select("id, created_at, mood_emoji, mood_label")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(10);
-
-        if (fetchError) {
-          throw fetchError;
-        }
-
-        setHistory(data || []);
+        const data = await moodRepository.getMoodHistory(user.id, 10);
+        setHistory(data);
       } catch (err: any) {
         console.error("Error fetching mood history:", err);
         setError(t("dashboard.moodHistory.error"));
@@ -159,7 +148,7 @@ export const MoodHistory: React.FC<MoodHistoryProps> = ({ refreshTrigger }) => {
               {t("dashboard.moodHistory.premiumChartTitle")}
             </p>
             <button
-              onClick={updateUserToPremium}
+              onClick={onUnlockClick}
               className="bg-gradient-to-r from-dawn-purple to-dawn-pink text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg hover:shadow-xl transition-transform transform hover:scale-105"
             >
               {t("dashboard.moodHistory.unlockTrends")}

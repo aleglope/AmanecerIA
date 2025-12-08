@@ -59,7 +59,7 @@ export const ExercisesPage: React.FC<ExercisesPageProps> = ({ onBack }) => {
                                         : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
                                     }`}
                 >
-                  {exercise.type}
+                  {t(`exerciseTypes.${exercise.type}`)}
                 </span>
                 <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
                   <svg
@@ -125,7 +125,7 @@ export const ExercisesPage: React.FC<ExercisesPageProps> = ({ onBack }) => {
                                         : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
                                     }`}
                 >
-                  {selectedExercise.type}
+                  {t(`exerciseTypes.${selectedExercise.type}`)}
                 </span>
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-night-text mt-2">
                   {t(selectedExercise.titleKey)}

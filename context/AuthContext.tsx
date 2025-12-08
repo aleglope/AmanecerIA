@@ -1,15 +1,31 @@
-import React, { createContext, useState, useEffect, ReactNode } from "react";
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useCallback,
+  useRef,
+} from "react";
 import { User, Focus, NotificationPreferences } from "../types";
-import { supabase } from "../supabaseClient";
-import { Session, PushSubscription } from "@supabase/supabase-js";
+import { Session } from "@supabase/supabase-js";
 import { calculateStreak } from "../utils/streakUtils";
+import { authRepository } from "../repositories/authRepository";
+import { profileRepository } from "../repositories/profileRepository";
+import { moodRepository } from "../repositories/moodRepository";
+import {
+  assertValidEmail,
+  assertValidPassword,
+  assertNotEmpty,
+} from "../utils/validators";
+import { DEFAULT_NOTIFICATION_PREFERENCES } from "../constants/supabase";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, pass: string) => Promise<any>;
+  error: string | null;
+  login: (email: string, pass: string) => Promise<void>;
   logout: () => Promise<void>;
-  register: (name: string, email: string, pass: string) => Promise<any>;
+  register: (name: string, email: string, pass: string) => Promise<void>;
   updateUserFocus: (focus: Focus) => Promise<void>;
   updateUserProfilePicture: (photoUrl: string) => Promise<void>;
   updateUserName: (name: string) => Promise<void>;
@@ -28,6 +44,7 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
+  error: null,
   login: async () => {},
   logout: async () => {},
   register: async () => {},
@@ -42,294 +59,366 @@ export const AuthContext = createContext<AuthContextType>({
   streak: 0,
 });
 
+/**
+ * Builds a default user object from auth user data
+ */
+function buildDefaultUser(authUser: any): User {
+  return {
+    id: authUser.id,
+    email: authUser.email,
+    name: authUser.user_metadata.name || authUser.email,
+    focus: undefined,
+    photoURL: undefined,
+    is_premium: false,
+    pushSubscription: null,
+    notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES,
+  };
+}
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [streak, setStreak] = useState(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
+  /**
+   * Loads user profile and streak data
+   * Implements race condition prevention with AbortController
+   */
+  const loadUserProfile = useCallback(async (session: Session) => {
+    // Cancel previous request if still running
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
+    try {
+      // Fetch profile data
+      const profile = await profileRepository.getProfileById(session.user.id);
+
+      // If aborted, don't update state
+      if (abortControllerRef.current.signal.aborted) {
+        return;
+      }
+
+      // Handle profile not found - create default
+      if (!profile) {
+        console.warn("Profile not found for user, creating one as a fallback.");
+        const defaultName =
+          session.user.user_metadata.name || session.user.email;
+        await profileRepository.createDefaultProfile(
+          session.user.id,
+          defaultName
+        );
+        setUser(buildDefaultUser(session.user));
+        setStreak(0);
+        return;
+      }
+
+      // Fetch mood history for streak calculation
+      const moodDates = await moodRepository.getMoodHistoryDates(
+        session.user.id
+      );
+      const calculatedStreak = calculateStreak(moodDates);
+
+      // Fetch push subscription separately (may not exist in DB)
+      let pushSub: PushSubscription | null = null;
+      try {
+        pushSub = await profileRepository.getPushSubscription(session.user.id);
+      } catch (err) {
+        console.warn("Could not fetch push subscription:", err);
+      }
+
+      // Check abort again before final state update
+      if (abortControllerRef.current.signal.aborted) {
+        return;
+      }
+
+      setUser({
+        id: session.user.id,
+        email: session.user.email,
+        name: profile.name,
+        focus: profile.focus as Focus,
+        photoURL: profile.photo_url,
+        is_premium: profile.is_premium,
+        pushSubscription: pushSub,
+        notificationPreferences:
+          profile.notification_preferences || DEFAULT_NOTIFICATION_PREFERENCES,
+      });
+      setStreak(calculatedStreak);
+      setError(null);
+    } catch (err: any) {
+      if (err.name !== "AbortError") {
+        console.error("Error loading profile:", err);
+        setError("Failed to load user profile");
+        setUser(null);
+        setStreak(0);
+      }
+    }
+  }, []);
+
+  /**
+   * Subscribe to auth state changes
+   */
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
+    const { unsubscribe } = authRepository.onAuthStateChange(
       async (_event, session: Session | null) => {
         setLoading(true);
         if (session) {
-          // First, fetch the core profile data.
-          const { data: profile, error } = await supabase
-            .from("profiles")
-            .select(
-              "name, focus, photo_url, is_premium, notification_preferences"
-            )
-            .eq("id", session.user.id)
-            .single();
-
-          // Fetch mood history dates for streak calculation
-          const { data: moodHistory } = await supabase
-            .from("mood_history")
-            .select("created_at")
-            .eq("user_id", session.user.id)
-            .order("created_at", { ascending: false });
-
-          if (moodHistory) {
-            const dates = moodHistory.map((m) => m.created_at);
-            setStreak(calculateStreak(dates));
-          } else {
-            setStreak(0);
-          }
-
-          if (error && error.code === "PGRST116") {
-            // Profile not found
-            console.warn(
-              "Profile not found for user, creating one as a fallback."
-            );
-            const newProfile = {
-              id: session.user.id,
-              name: session.user.user_metadata.name || session.user.email,
-            };
-            const { error: insertError } = await supabase
-              .from("profiles")
-              .insert(newProfile);
-
-            if (insertError) {
-              console.error("Error creating profile on the fly:", insertError);
-              setUser(null);
-            } else {
-              setUser({
-                id: session.user.id,
-                email: session.user.email,
-                name: newProfile.name,
-                focus: undefined,
-                photoURL: undefined,
-                is_premium: false,
-                pushSubscription: null,
-                notificationPreferences: { tone: "Amable", length: "Medio" },
-              });
-            }
-          } else if (error) {
-            console.error("Error fetching core profile:", error);
-            setUser(null);
-          } else {
-            // Core profile fetched. Now, try to get the push subscription.
-            let pushSub: PushSubscription | null = null;
-            const { data: subData, error: subError } = await supabase
-              .from("profiles")
-              .select("push_subscription")
-              .eq("id", session.user.id)
-              .single();
-
-            // Ignore the specific error for a missing column. Log other errors.
-            if (
-              subError &&
-              !subError.message.includes(
-                'column "push_subscription" does not exist'
-              )
-            ) {
-              console.error("Error fetching push subscription:", subError);
-            } else if (!subError && subData) {
-              pushSub = subData.push_subscription as PushSubscription | null;
-            }
-
-            setUser({
-              id: session.user.id,
-              email: session.user.email,
-              name: profile?.name,
-              focus: profile?.focus as Focus,
-              photoURL: profile?.photo_url,
-              is_premium: profile?.is_premium,
-              pushSubscription: pushSub,
-              notificationPreferences: profile?.notification_preferences || {
-                tone: "Amable",
-                length: "Medio",
-              },
-            });
-          }
+          await loadUserProfile(session);
         } else {
           setUser(null);
           setStreak(0);
+          setError(null);
         }
         setLoading(false);
       }
     );
 
     return () => {
-      subscription.unsubscribe();
+      unsubscribe();
+      abortControllerRef.current?.abort();
     };
-  }, []);
+  }, [loadUserProfile]);
 
-  const login = async (email: string, pass: string) => {
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password: pass,
-    });
-    setLoading(false);
-    if (error) throw error;
-  };
+  /**
+   * Login with email and password
+   */
+  const login = async (email: string, pass: string): Promise<void> => {
+    try {
+      assertValidEmail(email);
+      assertValidPassword(pass);
 
-  const loginWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-    });
-    if (error) {
-      console.error("Error logging in with Google:", error);
-      throw error;
-    }
-  };
+      setLoading(true);
+      setError(null);
 
-  const register = async (name: string, email: string, pass: string) => {
-    setLoading(true);
-    // The trigger 'on_auth_user_created' will automatically create the profile.
-    // No need to manually insert from the client side anymore.
-    const { error } = await supabase.auth.signUp({
-      email,
-      password: pass,
-      options: {
-        data: {
-          name: name,
-        },
-      },
-    });
+      const { error: authError } = await authRepository.signInWithPassword(
+        email,
+        pass
+      );
 
-    setLoading(false);
-    if (error) {
-      throw error;
-    }
-  };
-
-  const logout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-  };
-
-  const updateUserFocus = async (focus: Focus) => {
-    if (user) {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ focus: focus, updated_at: new Date() })
-        .eq("id", user.id);
-
-      if (error) {
-        console.error("Error updating focus:", error);
-      } else {
-        setUser({ ...user, focus });
+      if (authError) {
+        setError(authError.message);
+        throw authError;
       }
+    } catch (err: any) {
+      setError(err.message || "Login failed");
+      throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
+  /**
+   * Register new user
+   */
+  const register = async (
+    name: string,
+    email: string,
+    pass: string
+  ): Promise<void> => {
+    try {
+      assertNotEmpty(name, "Name");
+      assertValidEmail(email);
+      assertValidPassword(pass);
+
+      setLoading(true);
+      setError(null);
+
+      const { error: authError } = await authRepository.signUp(email, pass, {
+        name,
+      });
+
+      if (authError) {
+        setError(authError.message);
+        throw authError;
+      }
+    } catch (err: any) {
+      setError(err.message || "Registration failed");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Logout current user
+   */
+  const logout = async (): Promise<void> => {
+    try {
+      await authRepository.signOut();
+    } catch (err: any) {
+      console.error("Logout error:", err);
+      setError(err.message || "Logout failed");
+      // Even if server call fails, we continue to clear local state
+    } finally {
+      setUser(null);
+      setStreak(0);
+      // We don't clear error here if it was set in catch, but we might want to clear it eventually
+      // For now, let's leave it so user sees if something went wrong, though they are logged out.
+    }
+  };
+
+  /**
+   * Login with Google OAuth
+   */
+  const loginWithGoogle = async (): Promise<void> => {
+    try {
+      setError(null);
+      await authRepository.signInWithOAuth("google");
+    } catch (err: any) {
+      setError(err.message || "Google login failed");
+      throw err;
+    }
+  };
+
+  /**
+   * Resend confirmation email
+   */
+  const resendConfirmationEmail = async (email: string): Promise<void> => {
+    try {
+      assertValidEmail(email);
+      setError(null);
+      await authRepository.resendConfirmationEmail(email);
+    } catch (err: any) {
+      setError(err.message || "Failed to resend confirmation email");
+      throw err;
+    }
+  };
+
+  /**
+   * Update user focus
+   */
+  const updateUserFocus = async (focus: Focus): Promise<void> => {
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
+    try {
+      setError(null);
+      await profileRepository.updateFocus(user.id, focus);
+      setUser((prev) => (prev ? { ...prev, focus } : null));
+    } catch (err: any) {
+      setError(err.message || "Failed to update focus");
+      throw err;
+    }
+  };
+
+  /**
+   * Update user notification preferences
+   */
   const updateUserNotificationPreferences = async (
     preferences: NotificationPreferences
-  ) => {
-    if (user) {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          notification_preferences: preferences,
-          updated_at: new Date(),
-        })
-        .eq("id", user.id);
+  ): Promise<void> => {
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
 
-      if (error) {
-        console.error("Error updating notification preferences:", error);
-        throw error;
-      } else {
-        setUser({ ...user, notificationPreferences: preferences });
-      }
+    try {
+      setError(null);
+      await profileRepository.updateNotificationPreferences(
+        user.id,
+        preferences
+      );
+      setUser((prev) =>
+        prev ? { ...prev, notificationPreferences: preferences } : null
+      );
+    } catch (err: any) {
+      setError(err.message || "Failed to update notification preferences");
+      throw err;
     }
   };
 
+  /**
+   * Update push subscription
+   */
   const updateUserPushSubscription = async (
     subscription: PushSubscription | null
-  ) => {
-    if (user) {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ push_subscription: subscription, updated_at: new Date() })
-        .eq("id", user.id);
-
-      if (error) {
-        console.error("Error updating push subscription:", error);
-        throw error;
-      } else {
-        setUser({ ...user, pushSubscription: subscription });
-      }
-    }
-  };
-
-  const updateUserProfilePicture = async (photoUrl: string) => {
+  ): Promise<void> => {
     if (!user) {
-      throw new Error("User not authenticated.");
+      throw new Error("User not authenticated");
     }
 
-    const { data, error } = await supabase
-      .from("profiles")
-      .update({ photo_url: photoUrl, updated_at: new Date() })
-      .eq("id", user.id)
-      .select("photo_url");
-
-    if (error) {
-      console.error("Error updating profile picture URL:", error);
-      throw error;
-    }
-
-    if (!data || data.length === 0) {
-      throw new Error("Could not confirm profile picture update.");
-    }
-
-    setUser((currentUser) =>
-      currentUser ? { ...currentUser, photoURL: data[0].photo_url } : null
-    );
-  };
-
-  const updateUserName = async (name: string) => {
-    if (user) {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ name: name, updated_at: new Date() })
-        .eq("id", user.id);
-
-      if (error) {
-        console.error("Error updating name:", error);
-        throw error;
-      } else {
-        setUser({ ...user, name });
-      }
-    }
-  };
-
-  const updateUserToPremium = async () => {
-    if (user) {
-      const { data, error } = await supabase
-        .from("profiles")
-        .update({ is_premium: true, updated_at: new Date() })
-        .eq("id", user.id)
-        .select("is_premium");
-
-      if (error) {
-        console.error("Error updating to premium:", error);
-        throw error;
-      }
-
-      setUser((currentUser) =>
-        currentUser
-          ? { ...currentUser, is_premium: data?.[0].is_premium }
-          : null
+    try {
+      setError(null);
+      await profileRepository.updatePushSubscription(user.id, subscription);
+      setUser((prev) =>
+        prev ? { ...prev, pushSubscription: subscription } : null
       );
+    } catch (err: any) {
+      setError(err.message || "Failed to update push subscription");
+      throw err;
     }
   };
 
-  const resendConfirmationEmail = async (email: string) => {
-    const { error } = await supabase.auth.resend({
-      type: "signup",
-      email: email,
-    });
-    if (error) throw error;
+  /**
+   * Update profile picture
+   */
+  const updateUserProfilePicture = async (photoUrl: string): Promise<void> => {
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
+    try {
+      setError(null);
+      const updatedPhotoUrl = await profileRepository.updateProfilePicture(
+        user.id,
+        photoUrl
+      );
+      setUser((prev) => (prev ? { ...prev, photoURL: updatedPhotoUrl } : null));
+    } catch (err: any) {
+      setError(err.message || "Failed to update profile picture");
+      throw err;
+    }
+  };
+
+  /**
+   * Update user name
+   */
+  const updateUserName = async (name: string): Promise<void> => {
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
+    try {
+      assertNotEmpty(name, "Name");
+      setError(null);
+      await profileRepository.updateUserName(user.id, name);
+      setUser((prev) => (prev ? { ...prev, name } : null));
+    } catch (err: any) {
+      setError(err.message || "Failed to update name");
+      throw err;
+    }
+  };
+
+  /**
+   * Update user to premium
+   */
+  const updateUserToPremium = async (): Promise<void> => {
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
+    try {
+      setError(null);
+      const isPremium = await profileRepository.updatePremiumStatus(
+        user.id,
+        true
+      );
+      setUser((prev) => (prev ? { ...prev, is_premium: isPremium } : null));
+    } catch (err: any) {
+      setError(err.message || "Failed to upgrade to premium");
+      throw err;
+    }
   };
 
   const value = {
     user,
     loading,
+    error,
     login,
     logout,
     register,
@@ -344,9 +433,5 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     streak,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
